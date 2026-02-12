@@ -1,5 +1,7 @@
 ---
-stepsCompleted: [1, 2]
+stepsCompleted: [1, 2, 3, 4]
+status: complete
+completedAt: '2026-02-11'
 inputDocuments:
   - prd.md
   - architecture.md
