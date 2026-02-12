@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AtticCleaning.com — Design Directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --background: #FAFAF8;
+    --foreground: #1A1A1A;
+    --muted: #6B6B6B;
+    --border: #E5E5E0;
+    --accent: #D4A017;
+    --primary: #2563EB;
+    --primary-foreground: #FFFFFF;
+    --card: #FFFFFF;
+    --destructive: #DC2626;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #1A1A1A;
+    color: var(--foreground);
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(26, 26, 26, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #333;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    overflow-x: auto;
+  }
+
+  .nav-title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-right: 8px;
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  /* Section wrapper */
+  .direction {
+    display: none;
+    min-height: 100vh;
+    padding-top: 60px;
+  }
+
+  .direction.active {
+    display: block;
+  }
+
+  /* Overview page */
+  .overview {
+    padding: 80px 24px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: #fff;
+  }
+
+  .overview h1 {
+    font-family: 'Lora', serif;
+    font-size: 36px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .overview .subtitle {
+    color: #999;
+    font-size: 16px;
+    margin-bottom: 40px;
+  }
+
+  .direction-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+  }
+
+  .direction-card {
+    background: #252525;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .direction-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .direction-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .direction-card .tag {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+
+  .direction-card p {
+    color: #999;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Mockup frame */
+  .mockup-frame {
+    background: var(--background);
+    min-height: calc(100vh - 60px);
+  }
+
+  .mockup-label {
+    background: #1A1A1A;
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mockup-label h2 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .mockup-label .desc {
+    color: #999;
+    font-size: 13px;
+  }
+
+  /* Shared card styles */
+  .star { color: var(--accent); }
+
+  .chip {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+  }
+
+  .chip-rodent { background: #FEF3C7; color: #92400E; }
+  .chip-insulation { background: #DBEAFE; color: #1E40AF; }
+  .chip-decontam { background: #FCE7F3; color: #9D174D; }
+  .chip-mold { background: #D1FAE5; color: #065F46; }
+  .chip-general { background: #F3F4F6; color: #374151; }
+  .chip-restoration { background: #EDE9FE; color: #5B21B6; }
+
+  .review-snippet {
+    font-family: 'Source Serif 4', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 0;
+    max-width: 560px;
+    width: 100%;
+  }
+
+  .search-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    background: var(--card);
+  }
+
+  .search-bar input:focus {
+    border-color: var(--primary);
+  }
+
+  .search-bar button {
+    padding: 12px 24px;
+    background: var(--primary);
+    color: #fff;
+    border: 2px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ========== DIRECTION A: Clean Stack ========== */
+  .dir-a .hero {
+    text-align: center;
+    padding: 48px 24px 40px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dir-a .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--foreground);
+    margin-bottom: 8px;
+  }
+
+  .dir-a .hero p {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .dir-a .hero .search-bar {
+    margin: 0 auto;
+  }
+
+  .dir-a .results {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  .dir-a .results-meta {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .dir-a .listing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .dir-a .company-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .dir-a .rating-row {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--foreground);
+    margin-bottom: 8px;
+  }
+
+  .dir-a .chips { margin-bottom: 8px; }
+
+  .dir-a .contact-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .dir-a .contact-row a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* ========== DIRECTION B: Dense Grid ========== */
+  .dir-b .hero {
+    padding: 32px 24px 28px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dir-b .hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .dir-b .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 28px;
+    font-weight: 500;
+  }
+
+  .dir-b .results {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  .dir-b .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .dir-b .filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .dir-b .filter-chip {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--card);
+    cursor: pointer;
+  }
+
+  .dir-b .filter-chip.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .dir-b .sort-control {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .dir-b .sort-control select {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card);
+  }
+
+  .dir-b .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .dir-b .listing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .dir-b .company-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .dir-b .rating-row {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .dir-b .chips { margin-bottom: 6px; }
+  .dir-b .chip { font-size: 11px; padding: 3px 8px; }
+
+  .dir-b .review-snippet {
+    font-size: 13px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .dir-b .contact-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .dir-b .contact-row a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* ========== DIRECTION C: Editorial ========== */
+  .dir-c .hero {
+    text-align: center;
+    padding: 64px 24px 48px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dir-c .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 40px;
+    font-weight: 500;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .dir-c .hero p {
+    font-family: 'Source Serif 4', serif;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.5;
+    max-width: 520px;
+    margin: 0 auto 32px;
+  }
+
+  .dir-c .results {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 16px;
+  }
+
+  .dir-c .results-meta {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dir-c .listing-card {
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dir-c .company-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .dir-c .rating-row {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .dir-c .chips { margin-bottom: 12px; }
+
+  .dir-c .review-snippet {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .dir-c .contact-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .dir-c .contact-row a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* ========== DIRECTION D: Split Panel ========== */
+  .dir-d .top-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dir-d .logo {
+    font-weight: 700;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .dir-d .top-bar .search-bar {
+    max-width: 480px;
+  }
+
+  .dir-d .top-bar .search-bar input {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .dir-d .top-bar .search-bar button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .dir-d .split {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 120px);
+  }
+
+  .dir-d .sidebar {
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+  }
+
+  .dir-d .sidebar h3 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .dir-d .sidebar-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .dir-d .sidebar-filter input[type="checkbox"] {
+    accent-color: var(--primary);
+  }
+
+  .dir-d .sidebar .sort-section {
+    margin-top: 24px;
+  }
+
+  .dir-d .sidebar select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    background: var(--background);
+  }
+
+  .dir-d .main-results {
+    padding: 20px 24px;
+  }
+
+  .dir-d .results-meta {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .dir-d .listing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .dir-d .company-name { font-size: 17px; font-weight: 600; margin-bottom: 3px; }
+  .dir-d .rating-row { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .dir-d .chips { margin-bottom: 8px; }
+
+  .dir-d .card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .dir-d .card-bottom a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* ========== DIRECTION E: Hero-Forward ========== */
+  .dir-e .hero {
+    background: #1E293B;
+    color: #fff;
+    text-align: center;
+    padding: 72px 24px 56px;
+  }
+
+  .dir-e .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 40px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .dir-e .hero p {
+    color: #94A3B8;
+    font-size: 16px;
+    margin-bottom: 32px;
+  }
+
+  .dir-e .hero .search-bar {
+    margin: 0 auto;
+  }
+
+  .dir-e .hero .search-bar input {
+    border-color: #475569;
+    background: #334155;
+    color: #fff;
+  }
+
+  .dir-e .hero .search-bar input::placeholder {
+    color: #94A3B8;
+  }
+
+  .dir-e .city-strip {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    text-align: center;
+  }
+
+  .dir-e .city-strip span {
+    font-size: 13px;
+    color: var(--muted);
+    margin-right: 8px;
+  }
+
+  .dir-e .city-link {
+    display: inline-block;
+    padding: 4px 12px;
+    margin: 4px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--foreground);
+    text-decoration: none;
+  }
+
+  .dir-e .results {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  .dir-e .listing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .dir-e .card-info { flex: 1; }
+  .dir-e .company-name { font-size: 18px; font-weight: 600; margin-bottom: 3px; }
+  .dir-e .rating-row { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .dir-e .chips { margin-bottom: 8px; }
+
+  .dir-e .card-action {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .dir-e .btn-call {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .dir-e .btn-website {
+    color: var(--primary);
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  /* ========== DIRECTION F: Homepage-Focused ========== */
+  .dir-f .hero {
+    text-align: center;
+    padding: 56px 24px 40px;
+    background: var(--card);
+  }
+
+  .dir-f .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: 36px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .dir-f .hero p {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 28px;
+  }
+
+  .dir-f .hero .search-bar {
+    margin: 0 auto;
+  }
+
+  .dir-f .cities-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  .dir-f .section-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  .dir-f .city-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .dir-f .city-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--foreground);
+    transition: border-color 0.15s;
+  }
+
+  .dir-f .city-card:hover { border-color: var(--primary); }
+  .dir-f .city-card .city-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+  .dir-f .city-card .city-count { font-size: 13px; color: var(--muted); }
+
+  .dir-f .articles-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+  }
+
+  .dir-f .article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .dir-f .article-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    text-decoration: none;
+    color: var(--foreground);
+  }
+
+  .dir-f .article-card:hover { border-color: var(--primary); }
+  .dir-f .article-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+
+  .dir-f .article-card p {
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .dir-f .article-card .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  /* Footer */
+  .mock-footer {
+    background: #1E293B;
+    color: #94A3B8;
+    padding: 32px 24px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .dir-b .card-grid { grid-template-columns: 1fr; }
+    .dir-d .split { grid-template-columns: 1fr; }
+    .dir-d .sidebar { display: none; }
+    .dir-e .listing-card { flex-direction: column; }
+    .dir-e .card-action { flex-direction: row; align-items: center; }
+    .dir-f .city-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-title">AtticCleaning.com Directions</span>
+  <button class="nav-btn active" onclick="show('overview')">Overview</button>
+  <button class="nav-btn" onclick="show('a')">A: Clean Stack</button>
+  <button class="nav-btn" onclick="show('b')">B: Dense Grid</button>
+  <button class="nav-btn" onclick="show('c')">C: Editorial</button>
+  <button class="nav-btn" onclick="show('d')">D: Split Panel</button>
+  <button class="nav-btn" onclick="show('e')">E: Hero-Forward</button>
+  <button class="nav-btn" onclick="show('f')">F: Homepage</button>
+</nav>
+
+<!-- OVERVIEW -->
+<div class="direction active" id="overview">
+  <div class="overview">
+    <h1>Design Directions</h1>
+    <p class="subtitle">6 layout and density explorations within the established visual foundation. Same colors, fonts, and spacing tokens — different arrangements.</p>
+
+    <div class="direction-grid">
+      <div class="direction-card" onclick="show('a')">
+        <h3>A: Clean Stack</h3>
+        <span class="tag">RECOMMENDED</span>
+        <p>Single-column card stack. Full-width cards, generous spacing. The "calm competence" baseline — maximum readability, minimum visual noise. Best for Maria's anxious mobile scan.</p>
+      </div>
+
+      <div class="direction-card" onclick="show('b')">
+        <h3>B: Dense Grid</h3>
+        <span class="tag">DESKTOP VARIANT</span>
+        <p>Two-column card grid with filter toolbar. Higher information density, compact cards. Shows more results above the fold. Filter chips and sort inline above results.</p>
+      </div>
+
+      <div class="direction-card" onclick="show('c')">
+        <h3>C: Editorial</h3>
+        <span class="tag">CONTENT PATH</span>
+        <p>Narrow reading column, larger typography, generous vertical rhythm. Cards feel like editorial entries. Best for David's research mindset — authority over efficiency.</p>
+      </div>
+
+      <div class="direction-card" onclick="show('d')">
+        <h3>D: Split Panel</h3>
+        <span class="tag">POWER USER</span>
+        <p>Sidebar filters + main results area. Desktop-optimized layout with persistent filter controls. More structured for users who want to narrow results aggressively.</p>
+      </div>
+
+      <div class="direction-card" onclick="show('e')">
+        <h3>E: Hero-Forward</h3>
+        <span class="tag">BRAND PRESENCE</span>
+        <p>Dark hero section with prominent search, city quick-links strip, then results. Strong first impression, clear brand moment. Phone/website as button CTAs on cards.</p>
+      </div>
+
+      <div class="direction-card" onclick="show('f')">
+        <h3>F: Homepage Layout</h3>
+        <span class="tag">HOMEPAGE ONLY</span>
+        <p>Complete homepage with hero search, featured city grid, and educational article highlights. Shows the full homepage content hierarchy before any search.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION A: Clean Stack -->
+<div class="direction" id="a">
+  <div class="mockup-label">
+    <div>
+      <h2>Direction A: Clean Stack</h2>
+      <span class="desc">Single-column, full-width cards, maximum readability</span>
+    </div>
+  </div>
+  <div class="mockup-frame dir-a">
+    <div class="hero">
+      <h1>Find Trusted Attic Cleaning Pros</h1>
+      <p>Search by city or zip code to find rated specialists near you</p>
+      <div class="search-bar">
+        <input type="text" placeholder="Enter city or zip code..." />
+        <button>Search</button>
+      </div>
+    </div>
+    <div class="results">
+      <div class="results-meta">12 attic cleaning companies in Phoenix, AZ</div>
+
+      <div class="listing-card">
+        <div class="company-name">Desert Attic Solutions</div>
+        <div class="rating-row"><span class="star">★★★★★</span> 4.9 (187 reviews)</div>
+        <div class="chips">
+          <span class="chip chip-rodent">Rodent Cleanup</span>
+          <span class="chip chip-insulation">Insulation Removal</span>
+          <span class="chip chip-decontam">Decontamination</span>
+        </div>
+        <div class="review-snippet">"They found evidence of rats in our attic and had everything cleaned and re-insulated within two days. Professional crew, very thorough."</div>
+        <div class="contact-row">
+          <a href="#">(602) 555-0142</a>
+          <a href="#">Visit Website</a>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="company-name">Arizona Attic Pros</div>
+        <div class="rating-row"><span class="star">★★★★</span><span class="star" style="opacity:0.3">★</span> 4.6 (93 reviews)</div>
+        <div class="chips">
+          <span class="chip chip-general">General Cleaning</span>
+          <span class="chip chip-insulation">Insulation Removal</span>
+          <span class="chip chip-restoration">Attic Restoration</span>
+        </div>
+        <div class="review-snippet">"Great job cleaning out 20 years of accumulated dust and old insulation. Fair pricing and showed up on time."</div>
+        <div class="contact-row">
+          <a href="#">(602) 555-0298</a>
+          <a href="#">Visit Website</a>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="company-name">Valley Mold & Attic Care</div>
+        <div class="rating-row"><span class="star">★★★★★</span> 4.8 (142 reviews)</div>
+        <div class="chips">
+          <span class="chip chip-mold">Mold Remediation</span>
+          <span class="chip chip-decontam">Decontamination</span>
+        </div>
+        <div class="review-snippet">"Found black mold in our attic after a roof leak. They contained the area, removed everything safely, and the air quality test came back clean."</div>
+        <div class="contact-row">
+          <a href="#">(480) 555-0176</a>
+          <a href="#">Visit Website</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION B: Dense Grid -->
+<div class="direction" id="b">
+  <div class="mockup-label">
+    <div>
+      <h2>Direction B: Dense Grid</h2>
+      <span class="desc">Two-column cards, inline filters, compact density</span>
+    </div>
+  </div>
+  <div class="mockup-frame dir-b">
+    <div class="hero">
+      <div class="hero-inner">
+        <h1>Attic Cleaning Pros in Phoenix, AZ</h1>
+        <div class="search-bar">
+          <input type="text" placeholder="City or zip..." />
+          <button>Search</button>
+        </div>
+      </div>
+    </div>
+    <div class="results">
+      <div class="toolbar">
+        <div class="filter-chips">
+          <span class="filter-chip active">All Services</span>
+          <span class="filter-chip">Rodent Cleanup</span>
+          <span class="filter-chip">Insulation</span>
+          <span class="filter-chip">Mold</span>
+          <span class="filter-chip">Decontamination</span>
+        </div>
+        <div class="sort-control">
+          Sort: <select><option>Highest Rated</option><option>Most Reviews</option><option>Distance</option></select>
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="listing-card">
+          <div class="company-name">Desert Attic Solutions</div>
+          <div class="rating-row"><span class="star">★★★★★</span> 4.9 (187)</div>
+          <div class="chips">
+            <span class="chip chip-rodent">Rodent Cleanup</span>
+            <span class="chip chip-insulation">Insulation</span>
+          </div>
+          <div class="review-snippet">"They found evidence of rats in our attic and had everything cleaned and re-insulated within two days."</div>
+          <div class="contact-row">
+            <a href="#">(602) 555-0142</a>
+            <a href="#">Website</a>
+          </div>
+        </div>
+
+        <div class="listing-card">
+          <div class="company-name">Arizona Attic Pros</div>
+          <div class="rating-row"><span class="star">★★★★</span><span class="star" style="opacity:0.3">★</span> 4.6 (93)</div>
+          <div class="chips">
+            <span class="chip chip-general">General</span>
+            <span class="chip chip-restoration">Restoration</span>
+          </div>
+          <div class="review-snippet">"Great job cleaning out 20 years of accumulated dust and old insulation. Fair pricing."</div>
+          <div class="contact-row">
+            <a href="#">(602) 555-0298</a>
+            <a href="#">Website</a>
+          </div>
+        </div>
+
+        <div class="listing-card">
+          <div class="company-name">Valley Mold & Attic Care</div>
+          <div class="rating-row"><span class="star">★★★★★</span> 4.8 (142)</div>
+          <div class="chips">
+            <span class="chip chip-mold">Mold</span>
+            <span class="chip chip-decontam">Decontamination</span>
+          </div>
+          <div class="review-snippet">"Found black mold in our attic after a roof leak. They contained the area and removed everything safely."</div>
+          <div class="contact-row">
+            <a href="#">(480) 555-0176</a>
+            <a href="#">Website</a>
+          </div>
+        </div>
+
+        <div class="listing-card">
+          <div class="company-name">Phoenix Critter Control</div>
+          <div class="rating-row"><span class="star">★★★★</span><span class="star" style="opacity:0.3">★</span> 4.5 (67)</div>
+          <div class="chips">
+            <span class="chip chip-rodent">Rodent Cleanup</span>
+            <span class="chip chip-general">General</span>
+          </div>
+          <div class="review-snippet">"Quick response time and they sealed all the entry points after cleaning. No more noises at night."</div>
+          <div class="contact-row">
+            <a href="#">(623) 555-0331</a>
+            <a href="#">Website</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION C: Editorial -->
+<div class="direction" id="c">
+  <div class="mockup-label">
+    <div>
+      <h2>Direction C: Editorial</h2>
+      <span class="desc">Narrow column, generous typography, reading-first layout</span>
+    </div>
+  </div>
+  <div class="mockup-frame dir-c">
+    <div class="hero">
+      <h1>Attic Cleaning Specialists<br/>in Phoenix, Arizona</h1>
+      <p>Trusted local professionals rated by real homeowners. Find the right specialist for your attic — from rodent cleanup to full restoration.</p>
+      <div class="search-bar" style="margin:0 auto;">
+        <input type="text" placeholder="Search another city or zip..." />
+        <button>Search</button>
+      </div>
+    </div>
+    <div class="results">
+      <div class="results-meta">12 companies serving Phoenix, AZ — sorted by highest rated</div>
+
+      <div class="listing-card">
+        <div class="company-name">Desert Attic Solutions</div>
+        <div class="rating-row"><span class="star">★★★★★</span> 4.9 out of 5 — 187 reviews</div>
+        <div class="chips">
+          <span class="chip chip-rodent">Rodent Cleanup</span>
+          <span class="chip chip-insulation">Insulation Removal</span>
+          <span class="chip chip-decontam">Decontamination</span>
+        </div>
+        <div class="review-snippet">"They found evidence of rats in our attic and had everything cleaned and re-insulated within two days. Professional crew, very thorough. Would absolutely recommend to anyone dealing with wildlife in their attic."</div>
+        <div class="contact-row">
+          <a href="#">(602) 555-0142</a>
+          <a href="#">Visit Website →</a>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="company-name">Valley Mold & Attic Care</div>
+        <div class="rating-row"><span class="star">★★★★★</span> 4.8 out of 5 — 142 reviews</div>
+        <div class="chips">
+          <span class="chip chip-mold">Mold Remediation</span>
+          <span class="chip chip-decontam">Decontamination</span>
+        </div>
+        <div class="review-snippet">"Found black mold in our attic after a roof leak. They contained the area, removed everything safely, and the air quality test came back clean. Insurance process was smooth because they documented everything."</div>
+        <div class="contact-row">
+          <a href="#">(480) 555-0176</a>
+          <a href="#">Visit Website →</a>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="company-name">Arizona Attic Pros</div>
+        <div class="rating-row"><span class="star">★★★★</span><span class="star" style="opacity:0.3">★</span> 4.6 out of 5 — 93 reviews</div>
+        <div class="chips">
+          <span class="chip chip-general">General Cleaning</span>
+          <span class="chip chip-insulation">Insulation Removal</span>
+          <span class="chip chip-restoration">Attic Restoration</span>
+        </div>
+        <div class="review-snippet">"Great job cleaning out 20 years of accumulated dust and old insulation. Fair pricing and showed up on time. The attic looks brand new."</div>
+        <div class="contact-row">
+          <a href="#">(602) 555-0298</a>
+          <a href="#">Visit Website →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION D: Split Panel -->
+<div class="direction" id="d">
+  <div class="mockup-label">
+    <div>
+      <h2>Direction D: Split Panel</h2>
+      <span class="desc">Sidebar filters + main results area (desktop-optimized)</span>
+    </div>
+  </div>
+  <div class="mockup-frame dir-d">
+    <div class="top-bar">
+      <span class="logo">AtticCleaning.com</span>
+      <div class="search-bar">
+        <input type="text" value="Phoenix, AZ" />
+        <button>Search</button>
+      </div>
+    </div>
+    <div class="split">
+      <div class="sidebar">
+        <h3>Service Type</h3>
+        <label class="sidebar-filter"><input type="checkbox" checked /> Rodent Cleanup</label>
+        <label class="sidebar-filter"><input type="checkbox" checked /> Insulation Removal</label>
+        <label class="sidebar-filter"><input type="checkbox" checked /> Decontamination</label>
+        <label class="sidebar-filter"><input type="checkbox" checked /> Mold Remediation</label>
+        <label class="sidebar-filter"><input type="checkbox" checked /> General Cleaning</label>
+        <label class="sidebar-filter"><input type="checkbox" checked /> Attic Restoration</label>
+
+        <div class="sort-section">
+          <h3>Sort By</h3>
+          <select>
+            <option>Highest Rated</option>
+            <option>Most Reviews</option>
+            <option>Distance</option>
+          </select>
+        </div>
+      </div>
+      <div class="main-results">
+        <div class="results-meta">12 attic cleaning companies in Phoenix, AZ</div>
+
+        <div class="listing-card">
+          <div class="company-name">Desert Attic Solutions</div>
+          <div class="rating-row"><span class="star">★★★★★</span> 4.9 (187 reviews)</div>
+          <div class="chips">
+            <span class="chip chip-rodent">Rodent Cleanup</span>
+            <span class="chip chip-insulation">Insulation Removal</span>
+            <span class="chip chip-decontam">Decontamination</span>
+          </div>
+          <div class="review-snippet">"They found evidence of rats in our attic and had everything cleaned and re-insulated within two days."</div>
+          <div class="card-bottom">
+            <a href="#">(602) 555-0142</a>
+            <a href="#">Visit Website</a>
+          </div>
+        </div>
+
+        <div class="listing-card">
+          <div class="company-name">Valley Mold & Attic Care</div>
+          <div class="rating-row"><span class="star">★★★★★</span> 4.8 (142 reviews)</div>
+          <div class="chips">
+            <span class="chip chip-mold">Mold Remediation</span>
+            <span class="chip chip-decontam">Decontamination</span>
+          </div>
+          <div class="review-snippet">"Found black mold in our attic after a roof leak. They contained the area and removed everything safely."</div>
+          <div class="card-bottom">
+            <a href="#">(480) 555-0176</a>
+            <a href="#">Visit Website</a>
+          </div>
+        </div>
+
+        <div class="listing-card">
+          <div class="company-name">Arizona Attic Pros</div>
+          <div class="rating-row"><span class="star">★★★★</span><span class="star" style="opacity:0.3">★</span> 4.6 (93 reviews)</div>
+          <div class="chips">
+            <span class="chip chip-general">General Cleaning</span>
+            <span class="chip chip-insulation">Insulation Removal</span>
+          </div>
+          <div class="review-snippet">"Great job cleaning out 20 years of accumulated dust and old insulation. Fair pricing and showed up on time."</div>
+          <div class="card-bottom">
+            <a href="#">(602) 555-0298</a>
+            <a href="#">Visit Website</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION E: Hero-Forward -->
+<div class="direction" id="e">
+  <div class="mockup-label">
+    <div>
+      <h2>Direction E: Hero-Forward</h2>
+      <span class="desc">Dark hero, city strip, button CTAs on cards</span>
+    </div>
+  </div>
+  <div class="mockup-frame dir-e">
+    <div class="hero">
+      <h1>Find Your Attic Cleaning Specialist</h1>
+      <p>Rated professionals for rodent cleanup, insulation, mold remediation & more</p>
+      <div class="search-bar">
+        <input type="text" placeholder="Enter city or zip code..." />
+        <button>Search</button>
+      </div>
+    </div>
+    <div class="city-strip">
+      <span>Popular:</span>
+      <a href="#" class="city-link">Phoenix</a>
+      <a href="#" class="city-link">Los Angeles</a>
+      <a href="#" class="city-link">Houston</a>
+      <a href="#" class="city-link">Dallas</a>
+      <a href="#" class="city-link">Atlanta</a>
+      <a href="#" class="city-link">Chicago</a>
+      <a href="#" class="city-link">Seattle</a>
+      <a href="#" class="city-link">Denver</a>
+    </div>
+    <div class="results">
+      <div class="listing-card">
+        <div class="card-info">
+          <div class="company-name">Desert Attic Solutions</div>
+          <div class="rating-row"><span class="star">★★★★★</span> 4.9 (187 reviews)</div>
+          <div class="chips">
+            <span class="chip chip-rodent">Rodent Cleanup</span>
+            <span class="chip chip-insulation">Insulation Removal</span>
+            <span class="chip chip-decontam">Decontamination</span>
+          </div>
+          <div class="review-snippet">"They found evidence of rats in our attic and had everything cleaned and re-insulated within two days. Professional crew, very thorough."</div>
+        </div>
+        <div class="card-action">
+          <a href="#" class="btn-call">Call Now</a>
+          <a href="#" class="btn-website">Visit Website</a>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="card-info">
+          <div class="company-name">Valley Mold & Attic Care</div>
+          <div class="rating-row"><span class="star">★★★★★</span> 4.8 (142 reviews)</div>
+          <div class="chips">
+            <span class="chip chip-mold">Mold Remediation</span>
+            <span class="chip chip-decontam">Decontamination</span>
+          </div>
+          <div class="review-snippet">"Found black mold in our attic after a roof leak. They contained the area, removed everything safely."</div>
+        </div>
+        <div class="card-action">
+          <a href="#" class="btn-call">Call Now</a>
+          <a href="#" class="btn-website">Visit Website</a>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="card-info">
+          <div class="company-name">Arizona Attic Pros</div>
+          <div class="rating-row"><span class="star">★★★★</span><span class="star" style="opacity:0.3">★</span> 4.6 (93 reviews)</div>
+          <div class="chips">
+            <span class="chip chip-general">General Cleaning</span>
+            <span class="chip chip-insulation">Insulation Removal</span>
+          </div>
+          <div class="review-snippet">"Great job cleaning out 20 years of accumulated dust and old insulation. Fair pricing and showed up on time."</div>
+        </div>
+        <div class="card-action">
+          <a href="#" class="btn-call">Call Now</a>
+          <a href="#" class="btn-website">Visit Website</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION F: Homepage Layout -->
+<div class="direction" id="f">
+  <div class="mockup-label">
+    <div>
+      <h2>Direction F: Homepage Layout</h2>
+      <span class="desc">Complete homepage: hero → cities → articles → footer</span>
+    </div>
+  </div>
+  <div class="mockup-frame dir-f">
+    <div class="hero">
+      <h1>Find Trusted Attic Cleaning Pros</h1>
+      <p>Search rated specialists for rodent cleanup, insulation, mold remediation & more</p>
+      <div class="search-bar">
+        <input type="text" placeholder="Enter your city or zip code..." />
+        <button>Search</button>
+      </div>
+    </div>
+
+    <div class="cities-section">
+      <div class="section-title">Featured Cities</div>
+      <div class="city-grid">
+        <a href="#" class="city-card">
+          <div class="city-name">Phoenix, AZ</div>
+          <div class="city-count">47 companies</div>
+        </a>
+        <a href="#" class="city-card">
+          <div class="city-name">Los Angeles, CA</div>
+          <div class="city-count">82 companies</div>
+        </a>
+        <a href="#" class="city-card">
+          <div class="city-name">Houston, TX</div>
+          <div class="city-count">38 companies</div>
+        </a>
+        <a href="#" class="city-card">
+          <div class="city-name">Dallas, TX</div>
+          <div class="city-count">31 companies</div>
+        </a>
+        <a href="#" class="city-card">
+          <div class="city-name">Atlanta, GA</div>
+          <div class="city-count">29 companies</div>
+        </a>
+        <a href="#" class="city-card">
+          <div class="city-name">Chicago, IL</div>
+          <div class="city-count">36 companies</div>
+        </a>
+        <a href="#" class="city-card">
+          <div class="city-name">Seattle, WA</div>
+          <div class="city-count">24 companies</div>
+        </a>
+        <a href="#" class="city-card">
+          <div class="city-name">Denver, CO</div>
+          <div class="city-count">19 companies</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="articles-section">
+      <div class="section-title">Attic Cleaning Guides</div>
+      <div class="article-grid">
+        <a href="#" class="article-card">
+          <span class="tag">Rodent Cleanup</span>
+          <h3>Signs of Rodents in Your Attic: What to Look For</h3>
+          <p>Scratching sounds at night, droppings near insulation, and chewed wiring are the most common signs homeowners notice first...</p>
+        </a>
+        <a href="#" class="article-card">
+          <span class="tag">Insulation</span>
+          <h3>When Should You Replace Attic Insulation?</h3>
+          <p>Old, compressed, or contaminated insulation reduces your home's energy efficiency and can harbor allergens and moisture damage...</p>
+        </a>
+        <a href="#" class="article-card">
+          <span class="tag">Mold</span>
+          <h3>Attic Mold: Causes, Risks, and Professional Remediation</h3>
+          <p>Poor ventilation and roof leaks are the leading causes of attic mold. Left untreated, mold growth can compromise structural integrity...</p>
+        </a>
+      </div>
+    </div>
+
+    <div class="mock-footer">
+      AtticCleaning.com — Find trusted attic cleaning professionals near you
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.direction').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Find the matching nav button
+  const btns = document.querySelectorAll('.nav-btn');
+  btns.forEach(b => {
+    if (id === 'overview' && b.textContent === 'Overview') b.classList.add('active');
+    if (id === 'a' && b.textContent.includes('Clean Stack')) b.classList.add('active');
+    if (id === 'b' && b.textContent.includes('Dense Grid')) b.classList.add('active');
+    if (id === 'c' && b.textContent.includes('Editorial')) b.classList.add('active');
+    if (id === 'd' && b.textContent.includes('Split Panel')) b.classList.add('active');
+    if (id === 'e' && b.textContent.includes('Hero-Forward')) b.classList.add('active');
+    if (id === 'f' && b.textContent.includes('Homepage')) b.classList.add('active');
+  });
+  window.scrollTo(0, 0);
+}
+</script>
+
+</body>
+</html>
