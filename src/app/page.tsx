@@ -1,65 +1,107 @@
-import Image from "next/image";
+import SearchBar from "@/components/search-bar"
+import CityCard from "@/components/city-card"
+import ArticleCard from "@/components/article-card"
+import prisma from "@/lib/prisma"
 
-export default function Home() {
+// SSG not possible — database connection requires runtime (SSL cert at build time fails).
+// Page renders dynamically per request. Can be cached at CDN layer (Cloudflare) in production.
+export const dynamic = "force-dynamic"
+
+const PLACEHOLDER_ARTICLES = [
+  {
+    title: "What to Expect from an Attic Cleaning Service",
+    excerpt:
+      "A comprehensive guide to understanding the attic cleaning process, from initial inspection to final cleanup.",
+    topicTag: "Getting Started",
+    slug: "what-to-expect",
+  },
+  {
+    title: "Signs Your Attic Needs Professional Cleaning",
+    excerpt:
+      "Learn the warning signs that indicate your attic may need professional attention, including pest evidence and insulation issues.",
+    topicTag: "Maintenance",
+    slug: "signs-attic-needs-cleaning",
+  },
+  {
+    title: "How to Choose the Right Attic Cleaning Company",
+    excerpt:
+      "Tips for evaluating and selecting a reputable attic cleaning service, including what questions to ask and certifications to look for.",
+    topicTag: "Hiring Guide",
+    slug: "choosing-attic-cleaning-company",
+  },
+]
+
+export default async function HomePage() {
+  const cities = await prisma.city.findMany({
+    select: {
+      name: true,
+      state: true,
+      slug: true,
+      _count: {
+        select: { listings: true },
+      },
+    },
+    orderBy: {
+      listings: {
+        _count: "desc",
+      },
+    },
+    take: 8,
+  })
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="py-12">
+      {/* Hero Section */}
+      <section className="flex flex-col items-center text-center">
+        <h1 className="font-display text-[1.75rem] font-medium leading-[1.2] text-foreground md:text-[2.5rem]">
+          Find trusted attic cleaning professionals near you
+        </h1>
+        <div className="mt-6 w-full max-w-2xl">
+          <SearchBar variant="hero" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </section>
+
+      {/* Featured Cities */}
+      {cities.length > 0 && (
+        <section className="mt-8">
+          <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
+            Featured Cities
+          </h2>
+          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {cities.map((city) => (
+              <CityCard
+                key={city.slug}
+                name={city.name}
+                state={city.state}
+                slug={city.slug}
+                companyCount={city._count.listings}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Educational Content */}
+      <section className="mt-8">
+        <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
+          Learn About Attic Cleaning
+        </h2>
+        <p className="mt-2 font-serif text-sm text-muted-foreground">
+          Explore our guides to help you make informed decisions about attic
+          cleaning services.
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {PLACEHOLDER_ARTICLES.map((article) => (
+            <ArticleCard
+              key={article.slug}
+              title={article.title}
+              excerpt={article.excerpt}
+              topicTag={article.topicTag}
+              slug={article.slug}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          ))}
         </div>
-      </main>
+      </section>
     </div>
-  );
+  )
 }
