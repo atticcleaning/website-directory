@@ -52,7 +52,7 @@ development_status:
   # Epic 2: Search & Discovery Experience
   epic-2: in-progress
   2-1-root-layout-header-footer: done
-  2-2-search-api-route-with-radius-expansion: backlog
+  2-2-search-api-route-with-radius-expansion: done
   2-3-searchbar-component: backlog
   2-4-listingcard-starrating-servicetagchip-components: backlog
   2-5-search-results-page-with-filters-sort: backlog
