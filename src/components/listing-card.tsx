@@ -1,0 +1,83 @@
+import Link from "next/link"
+import { Phone, ExternalLink } from "lucide-react"
+import StarRating from "@/components/star-rating"
+import ServiceTagChip from "@/components/service-tag-chip"
+import type { ListingResult } from "@/types"
+
+interface ListingCardProps {
+  listing: ListingResult
+}
+
+export default function ListingCard({ listing }: ListingCardProps) {
+  const hasContact = listing.phone || listing.website
+  const roundedDistance = listing.distanceMiles !== null ? Math.round(listing.distanceMiles) : null
+  const distanceText = roundedDistance !== null
+    ? `${roundedDistance} ${roundedDistance === 1 ? "mile" : "miles"} away`
+    : null
+
+  return (
+    <article className="rounded-lg border border-border bg-card p-3 md:p-4">
+      <Link
+        href={`/${listing.citySlug}/${listing.companySlug}`}
+        className="inline-flex min-h-[44px] items-center font-sans text-lg font-semibold text-foreground"
+      >
+        {listing.name}
+      </Link>
+
+      <div className="mt-1">
+        <StarRating
+          rating={listing.starRating}
+          reviewCount={listing.reviewCount}
+          variant="compact"
+        />
+      </div>
+
+      {listing.serviceTags.length > 0 && (
+        <div className="mt-2 flex gap-1.5 overflow-x-auto md:flex-wrap">
+          {listing.serviceTags.map((tag) => (
+            <ServiceTagChip key={tag} serviceType={tag} variant="card" />
+          ))}
+        </div>
+      )}
+
+      {listing.reviewSnippet && (
+        <p className="mt-2 font-serif text-sm italic text-muted-foreground line-clamp-2">
+          {listing.reviewSnippet}
+        </p>
+      )}
+
+      {distanceText && (
+        <p className="mt-1 font-sans text-[13px] font-medium text-muted-foreground">
+          {distanceText}
+        </p>
+      )}
+
+      {hasContact && (
+        <div className="mt-3 flex items-center gap-4 border-t border-border pt-3">
+          {listing.phone && (
+            <a
+              href={`tel:${listing.phone.replace(/[^\d+]/g, "")}`}
+              aria-label={`Call ${listing.name}`}
+              className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary"
+            >
+              <Phone className="h-4 w-4" aria-hidden="true" />
+              {listing.phone}
+            </a>
+          )}
+          {listing.website && (
+            <a
+              href={listing.website}
+              target="_blank"
+              rel="noopener"
+              aria-label={`Visit ${listing.name} website`}
+              className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary"
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              Visit Website
+            </a>
+          )}
+        </div>
+      )}
+    </article>
+  )
+}
