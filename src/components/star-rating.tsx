@@ -14,7 +14,7 @@ export default function StarRating({ rating, reviewCount, variant }: StarRatingP
   return (
     <div
       className="flex items-center gap-1"
-      aria-label={`Rated ${rating} out of 5 based on ${reviewCount} reviews`}
+      aria-label={`Rated ${rating} out of 5${reviewCount > 0 ? ` based on ${reviewCount} reviews` : ""}`}
     >
       {Array.from({ length: fullStars }, (_, i) => (
         <svg
@@ -50,9 +50,11 @@ export default function StarRating({ rating, reviewCount, variant }: StarRatingP
         </svg>
       ))}
       <span className="font-sans text-sm font-medium text-foreground">{rating}</span>
-      <span className="font-sans text-sm text-muted-foreground">
-        {variant === "compact" ? `(${reviewCount})` : `(${reviewCount} reviews)`}
-      </span>
+      {reviewCount > 0 && (
+        <span className="font-sans text-sm text-muted-foreground">
+          {variant === "compact" ? `(${reviewCount})` : `(${reviewCount} reviews)`}
+        </span>
+      )}
     </div>
   )
 }
