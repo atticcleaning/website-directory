@@ -50,8 +50,8 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: Search & Discovery Experience
-  epic-2: backlog
-  2-1-root-layout-header-footer: backlog
+  epic-2: in-progress
+  2-1-root-layout-header-footer: done
   2-2-search-api-route-with-radius-expansion: backlog
   2-3-searchbar-component: backlog
   2-4-listingcard-starrating-servicetagchip-components: backlog
