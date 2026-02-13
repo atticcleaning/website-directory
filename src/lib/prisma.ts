@@ -1,8 +1,14 @@
 import { PrismaClient } from "../app/generated/prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
 
+// Strip sslmode from connection string — pg driver maps "require" to "verify-full"
+// which rejects Digital Ocean's self-signed cert. We set SSL explicitly instead.
+const dbUrl = new URL(process.env.DATABASE_URL!)
+dbUrl.searchParams.delete("sslmode")
+
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: dbUrl.toString(),
+  ssl: { rejectUnauthorized: false },
 })
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
