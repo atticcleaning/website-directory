@@ -5,7 +5,7 @@ interface ServiceTagChipProps {
   variant: "card" | "filter"
 }
 
-const SERVICE_TAG_CONFIG: Record<ServiceType, { label: string; bgVar: string; textVar: string }> = {
+export const SERVICE_TAG_CONFIG: Record<ServiceType, { label: string; bgVar: string; textVar: string }> = {
   RODENT_CLEANUP:     { label: "Rodent Cleanup",     bgVar: "--chip-rodent-bg",         textVar: "--chip-rodent-text" },
   INSULATION_REMOVAL: { label: "Insulation Removal", bgVar: "--chip-insulation-bg",     textVar: "--chip-insulation-text" },
   DECONTAMINATION:    { label: "Decontamination",    bgVar: "--chip-decontamination-bg", textVar: "--chip-decontamination-text" },
@@ -18,7 +18,7 @@ export default function ServiceTagChip({ serviceType, variant }: ServiceTagChipP
   const config = SERVICE_TAG_CONFIG[serviceType]
 
   if (variant === "filter") {
-    // Filter variant will be implemented in Story 2.5
+    // Filter rendering handled by FilterToolbar component
     return null
   }
 
