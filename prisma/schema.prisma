@@ -1,0 +1,99 @@
+// Prisma schema for atticcleaning-website directory
+// Models: Listing, City, Review, ServiceTag, SearchLog, ZipCode
+// Naming: PascalCase models, camelCase fields, SCREAMING_SNAKE enums
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum ServiceType {
+  RODENT_CLEANUP
+  INSULATION_REMOVAL
+  DECONTAMINATION
+  MOLD_REMEDIATION
+  GENERAL_CLEANING
+  ATTIC_RESTORATION
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model City {
+  id        String    @id @default(cuid())
+  name      String
+  state     String
+  slug      String    @unique
+  latitude  Float
+  longitude Float
+  listings  Listing[]
+  createdAt DateTime  @default(now())
+}
+
+model Listing {
+  id            String       @id @default(cuid())
+  googlePlaceId String       @unique
+  name          String
+  slug          String
+  starRating    Float
+  reviewCount   Int
+  phone         String?
+  website       String?
+  address       String
+  latitude      Float
+  longitude     Float
+  city          City         @relation(fields: [cityId], references: [id])
+  cityId        String
+  reviews       Review[]
+  serviceTags   ServiceTag[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@unique([cityId, slug])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  listing     Listing  @relation(fields: [listingId], references: [id])
+  listingId   String
+  authorName  String
+  rating      Float
+  text        String?
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+}
+
+model ServiceTag {
+  id          String      @id @default(cuid())
+  listing     Listing     @relation(fields: [listingId], references: [id])
+  listingId   String
+  serviceType ServiceType
+
+  @@unique([listingId, serviceType])
+}
+
+model ZipCode {
+  id        String @id @default(cuid())
+  code      String @unique
+  city      String
+  state     String
+  latitude  Float
+  longitude Float
+}
+
+model SearchLog {
+  id          String   @id @default(cuid())
+  query       String
+  resultCount Int
+  radiusMiles Float
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}
