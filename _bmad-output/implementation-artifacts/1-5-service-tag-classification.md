@@ -1,6 +1,6 @@
 # Story 1.5: Service Tag Classification
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -25,36 +25,36 @@ So that homeowners can filter and identify specialists by specific attic cleanin
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create classification script with keyword matching engine (AC: #1, #2, #3, #4, #5)
-  - [ ] 1.1 Create `src/scripts/classify-service-tags.ts` following established script pattern (dotenv, PrismaPg adapter, async main, DATABASE_URL guard, TLS bypass)
-  - [ ] 1.2 Define keyword map: `Record<ServiceType, string[]>` with keyword lists for each of the 6 service types
-  - [ ] 1.3 Implement `classifyListing()` function that checks `description` and `subtypes` (primary) against keyword lists, falling back to `name` only when both primary fields are null. Use case-insensitive word-boundary matching
-  - [ ] 1.4 Load all listings from database with `select: { id, name, description, subtypes }`
-  - [ ] 1.5 For each listing, run classification and collect matched ServiceType values
+- [x] Task 1: Create classification script with keyword matching engine (AC: #1, #2, #3, #4, #5)
+  - [x] 1.1 Create `src/scripts/classify-service-tags.ts` following established script pattern (dotenv, PrismaPg adapter, async main, DATABASE_URL guard, TLS bypass)
+  - [x] 1.2 Define keyword map: `Record<ServiceType, string[]>` with keyword lists for each of the 6 service types
+  - [x] 1.3 Implement `classifyListing()` function that checks `description` and `subtypes` (primary) against keyword lists, falling back to `name` only when both primary fields are null. Use case-insensitive word-boundary matching
+  - [x] 1.4 Load all listings from database with `select: { id, name, description, subtypes }`
+  - [x] 1.5 For each listing, run classification and collect matched ServiceType values
 
-- [ ] Task 2: Implement idempotent tag persistence (AC: #6)
-  - [ ] 2.1 Delete all existing ServiceTag records at the start of the run (`prisma.serviceTag.deleteMany()`)
-  - [ ] 2.2 Batch-insert new ServiceTag records using `prisma.serviceTag.createMany({ data, skipDuplicates: true })` for efficiency and safety
-  - [ ] 2.3 Verify the `@@unique([listingId, serviceType])` constraint prevents any accidental duplicates (skipDuplicates handles edge cases defensively)
+- [x] Task 2: Implement idempotent tag persistence (AC: #6)
+  - [x] 2.1 Delete all existing ServiceTag records at the start of the run (`prisma.serviceTag.deleteMany()`)
+  - [x] 2.2 Batch-insert new ServiceTag records using `prisma.serviceTag.createMany({ data, skipDuplicates: true })` for efficiency and safety
+  - [x] 2.3 Verify the `@@unique([listingId, serviceType])` constraint prevents any accidental duplicates (skipDuplicates handles edge cases defensively)
 
-- [ ] Task 3: Implement summary report (AC: #7, #8)
-  - [ ] 3.1 Track: total listings, listings with tags, listings without tags, per-type tag counts
-  - [ ] 3.2 Calculate and display classification rate as percentage
-  - [ ] 3.3 Output formatted summary report to stdout
+- [x] Task 3: Implement summary report (AC: #7, #8)
+  - [x] 3.1 Track: total listings, listings with tags, listings without tags, per-type tag counts
+  - [x] 3.2 Calculate and display classification rate as percentage
+  - [x] 3.3 Output formatted summary report to stdout
 
-- [ ] Task 4: Test and verify (AC: #2, #5, #6, #7, #8)
-  - [ ] 4.1 Check null rates: query how many listings have null `description` and/or null `subtypes` — this determines achievable classification rate
-  - [ ] 4.2 Run against current database (18 listings from Story 1.4 live import)
-  - [ ] 4.3 Verify word-boundary regex edge cases: "mold" must NOT match "remodel", "clean" must NOT match every company name, "pest" SHOULD match "Pest control service" in subtypes
-  - [ ] 4.4 Verify GENERAL_CLEANING is NOT applied to every listing — only those with "cleaning"/"clean" in description/subtypes (not name)
-  - [ ] 4.5 Verify idempotency: re-run produces identical ServiceTag records (same count, same distribution)
-  - [ ] 4.6 Verify summary report accuracy against manual spot-checks
-  - [ ] 4.7 If classification rate < 80%, check if low rate is due to missing description/subtypes data — tune keywords or document expected rate for current dataset
+- [x] Task 4: Test and verify (AC: #2, #5, #6, #7, #8)
+  - [x] 4.1 Check null rates: query how many listings have null `description` and/or null `subtypes` — this determines achievable classification rate
+  - [x] 4.2 Run against current database (18 listings from Story 1.4 live import)
+  - [x] 4.3 Verify word-boundary regex edge cases: "mold" must NOT match "remodel", "clean" must NOT match every company name, "pest" SHOULD match "Pest control service" in subtypes
+  - [x] 4.4 Verify GENERAL_CLEANING is NOT applied to every listing — only those with "cleaning"/"clean" in description/subtypes (not name)
+  - [x] 4.5 Verify idempotency: re-run produces identical ServiceTag records (same count, same distribution)
+  - [x] 4.6 Verify summary report accuracy against manual spot-checks
+  - [x] 4.7 If classification rate < 80%, check if low rate is due to missing description/subtypes data — tune keywords or document expected rate for current dataset
 
-- [ ] Task 5: Validate build integrity (AC: all)
-  - [ ] 5.1 Run `npx tsc --noEmit` — zero type errors
-  - [ ] 5.2 Run `npm run lint` — zero violations
-  - [ ] 5.3 Run `npm run build` — compiles successfully
+- [x] Task 5: Validate build integrity (AC: all)
+  - [x] 5.1 Run `npx tsc --noEmit` — zero type errors
+  - [x] 5.2 Run `npm run lint` — zero violations
+  - [x] 5.3 Run `npm run build` — compiles successfully
 
 ## Dev Notes
 
@@ -299,12 +299,34 @@ main().catch((e) => { console.error("Classification failed:", e); process.exit(1
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Opus 4.6
 
 ### Debug Log References
 
+None — implementation was straightforward with no debugging needed.
+
 ### Completion Notes List
+
+- Created `src/scripts/classify-service-tags.ts` with two-tier keyword classification strategy
+- Keyword map covers all 6 ServiceType enum values with conservative word-boundary matching
+- Two-tier field strategy: primary (description + subtypes), fallback (name only when both null)
+- `matchesKeyword()` uses `\b` regex for single words, `includes()` for multi-word/hyphenated keywords
+- Idempotent via `$transaction(deleteMany + createMany({ skipDuplicates: true }))` — atomic swap
+- Classification results on 18 listings: 94.4% rate (17/18 tagged), 30 total tags
+- GENERAL_CLEANING applied to only 3/18 listings (16.7%) — two-tier strategy prevents mass false positives
+- 1 untagged listing: "Home Attics" (subtypes="Contractor") — correct conservative behavior
+- Null rates: 0/18 null description, 0/18 null subtypes — all listings have primary fields
+- Word boundary verified: "mold" ≠ "remodel", "clean" ≠ "cleaning" (as standalone word), "pest" = "Pest control service"
+- Idempotency verified: second run cleared 30 tags and recreated identical 30 tags
+- Zero TypeScript errors, zero lint violations, build compiles successfully
+- Classification rate 94.4% exceeds 80% target — Task 4.7 N/A
+- Code review fixes applied: M1 (transaction atomicity), M2 (removed generic keywords: thermal, r-value, insulating), M3 ("repair" → "attic repair" for conservative matching)
 
 ### Change Log
 
+- 2026-02-12: Created classify-service-tags.ts with full classification engine, ran against 18 listings (94.4% rate)
+- 2026-02-12: Code review — wrapped deleteMany+createMany in $transaction, narrowed INSULATION_REMOVAL/ATTIC_RESTORATION keywords
+
 ### File List
+
+- src/scripts/classify-service-tags.ts (new)
