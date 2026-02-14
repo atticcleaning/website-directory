@@ -99,4 +99,5 @@ model SearchLog {
   createdAt   DateTime @default(now())
 
   @@index([createdAt])
+  @@index([query])
 }

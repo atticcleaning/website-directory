@@ -335,18 +335,20 @@ export async function searchListings(params: SearchParams): Promise<SearchRespon
   // Enrich with service tags and review snippets
   const enrichedResults = await enrichResults(rows)
 
-  // Log search (fire-and-forget)
-  prisma.searchLog
-    .create({
-      data: {
-        query: trimmedQuery,
-        resultCount: enrichedResults.length,
-        radiusMiles: finalRadius,
-        latitude: location?.latitude ?? null,
-        longitude: location?.longitude ?? null,
-      },
-    })
-    .catch((err: unknown) => console.error("Search log failed:", err))
+  // Log low-result searches for expansion prioritization (fire-and-forget)
+  if (enrichedResults.length < MIN_RESULTS) {
+    prisma.searchLog
+      .create({
+        data: {
+          query: trimmedQuery,
+          resultCount: enrichedResults.length,
+          radiusMiles: finalRadius,
+          latitude: location?.latitude ?? null,
+          longitude: location?.longitude ?? null,
+        },
+      })
+      .catch((err: unknown) => console.error("Search log failed:", err))
+  }
 
   return {
     results: enrichedResults,
