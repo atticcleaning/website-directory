@@ -9,6 +9,7 @@ dbUrl.searchParams.delete("sslmode")
 const adapter = new PrismaPg({
   connectionString: dbUrl.toString(),
   ssl: { rejectUnauthorized: false },
+  max: 3,
 })
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
