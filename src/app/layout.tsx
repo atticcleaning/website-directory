@@ -29,6 +29,9 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL ?? "https://atticcleaning.com"
+  ),
   title: "AtticCleaning.com - Find Top-Rated Attic Cleaning Companies",
   description:
     "Search and compare attic cleaning specialists near you. Browse ratings, reviews, and service tags for insulation removal, rodent cleanup, decontamination, and more.",

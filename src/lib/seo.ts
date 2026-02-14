@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 const SITE_NAME = "AtticCleaning.com"
-const BASE_URL =
+export const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL ?? "https://atticcleaning.com"
 
 export function buildMetadata({
