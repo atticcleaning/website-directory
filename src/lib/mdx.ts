@@ -3,6 +3,7 @@ import path from "path"
 import matter from "gray-matter"
 import { compileMDX } from "next-mdx-remote/rsc"
 import remarkGfm from "remark-gfm"
+import { mdxComponents } from "@/components/mdx"
 
 export interface ArticleFrontmatter {
   title: string
@@ -37,6 +38,7 @@ export async function getArticleBySlug(slug: string) {
         remarkPlugins: [remarkGfm],
       },
     },
+    components: mdxComponents,
   })
 
   return { content, frontmatter }

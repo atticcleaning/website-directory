@@ -1,7 +1,8 @@
 import { cache } from "react"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { getArticleSlugs, getArticleBySlug } from "@/lib/mdx"
+import { getArticleSlugs, getArticleBySlug, getAllArticles } from "@/lib/mdx"
+import ArticleCard from "@/components/article-card"
 
 const getCachedArticle = cache(async function getCachedArticle(slug: string) {
   return getArticleBySlug(slug)
@@ -55,6 +56,17 @@ export default async function ArticlePage({
 
   const { frontmatter, content } = article
 
+  const allArticles = getAllArticles()
+  const sameTopicArticles = allArticles.filter(
+    (a) => a.topicTag === frontmatter.topicTag && a.slug !== frontmatter.slug
+  )
+  const relatedArticles =
+    sameTopicArticles.length >= 2
+      ? sameTopicArticles.slice(0, 3)
+      : allArticles
+          .filter((a) => a.slug !== frontmatter.slug)
+          .slice(0, 3)
+
   return (
     <div className="mx-auto max-w-[680px] py-6 md:py-8">
       {/* Topic Tag */}
@@ -77,6 +89,26 @@ export default async function ArticlePage({
 
       {/* Article Content */}
       <article className="prose mt-8">{content}</article>
+
+      {/* Related Articles */}
+      {relatedArticles.length > 0 && (
+        <section className="mt-8">
+          <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
+            Related Articles
+          </h2>
+          <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {relatedArticles.map((related) => (
+              <ArticleCard
+                key={related.slug}
+                title={related.title}
+                excerpt={related.excerpt}
+                topicTag={related.topicTag}
+                slug={related.slug}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

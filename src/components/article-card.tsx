@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 interface ArticleCardProps {
   title: string
   excerpt: string
@@ -5,9 +7,12 @@ interface ArticleCardProps {
   slug: string
 }
 
-export default function ArticleCard({ title, excerpt, topicTag }: ArticleCardProps) {
+export default function ArticleCard({ title, excerpt, topicTag, slug }: ArticleCardProps) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <Link
+      href={`/articles/${slug}`}
+      className="block min-h-[44px] rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary"
+    >
       <span className="font-sans text-xs font-medium uppercase text-muted-foreground">
         {topicTag}
       </span>
@@ -17,6 +22,6 @@ export default function ArticleCard({ title, excerpt, topicTag }: ArticleCardPro
       <p className="mt-1 font-serif text-sm text-muted-foreground line-clamp-2">
         {excerpt}
       </p>
-    </div>
+    </Link>
   )
 }
