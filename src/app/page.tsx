@@ -1,12 +1,23 @@
+import type { Metadata } from "next"
 import SearchBar from "@/components/search-bar"
 import CityCard from "@/components/city-card"
 import ArticleCard from "@/components/article-card"
 import prisma from "@/lib/prisma"
 import { getAllArticles } from "@/lib/mdx"
+import { buildMetadata } from "@/lib/seo"
 
 // Dynamic page — city data served fresh per request.
 // Can be cached at CDN layer (Cloudflare) in production.
 export const dynamic = "force-dynamic"
+
+export function generateMetadata(): Metadata {
+  return buildMetadata({
+    title: "AtticCleaning.com - Find Top-Rated Attic Cleaning Companies",
+    description:
+      "Search and compare attic cleaning specialists near you. Browse ratings, reviews, and service tags for insulation removal, rodent cleanup, decontamination, and more.",
+    path: "/",
+  })
+}
 
 export default async function HomePage() {
   let articles: ReturnType<typeof getAllArticles> = []

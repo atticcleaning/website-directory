@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { searchListings } from "@/lib/search"
 import RadiusInfo from "@/components/radius-info"
 import FilterToolbar from "@/components/filter-toolbar"
+import { buildMetadata } from "@/lib/seo"
 
 const getSearchResults = cache((q: string) => searchListings({ q }))
 
@@ -17,14 +18,15 @@ export async function generateMetadata({
   const locationStr = data.meta.location
     ? `${data.meta.location.city}, ${data.meta.location.state}`
     : q
-  return {
+  return buildMetadata({
     title: locationStr
       ? `Attic Cleaning Companies in ${locationStr} | AtticCleaning.com`
       : "Search Results | AtticCleaning.com",
     description: locationStr
       ? `Find top-rated attic cleaning companies in ${locationStr}. Compare ratings, reviews, and services.`
       : "Search results for attic cleaning companies. Compare ratings, reviews, and services.",
-  }
+    path: "/search",
+  })
 }
 
 export default async function SearchPage({

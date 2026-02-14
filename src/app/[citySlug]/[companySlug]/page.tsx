@@ -7,6 +7,7 @@ import StarRating from "@/components/star-rating"
 import ServiceTagChip from "@/components/service-tag-chip"
 import GoogleMap from "@/components/google-map"
 import prisma from "@/lib/prisma"
+import { buildMetadata, buildLocalBusinessJsonLd } from "@/lib/seo"
 
 const getListing = cache(async function getListing(citySlug: string, companySlug: string) {
   return prisma.listing.findFirst({
@@ -45,7 +46,7 @@ export async function generateMetadata({
   const listing = await getListing(citySlug, companySlug)
 
   if (!listing) {
-    return { title: "Listing Not Found | AtticCleaning.com" }
+    return { title: "Listing Not Found | AtticCleaning.com", robots: { index: false } }
   }
 
   const services = listing.serviceTags
@@ -53,10 +54,11 @@ export async function generateMetadata({
     .slice(0, 3)
     .join(", ")
 
-  return {
+  return buildMetadata({
     title: `${listing.name} - Attic Cleaning in ${listing.city.name}, ${listing.city.state}`,
     description: `${listing.name} in ${listing.city.name}, ${listing.city.state}. Rated ${listing.starRating} stars from ${listing.reviewCount} reviews. Services: ${services}.`,
-  }
+    path: `/${citySlug}/${companySlug}`,
+  })
 }
 
 function formatDate(date: Date): string {
@@ -99,8 +101,24 @@ export default async function ListingDetailPage({
   const workingHours = parseWorkingHours(listing.workingHours)
   const mapsApiKey = process.env.GOOGLE_MAPS_API_KEY ?? ""
 
+  const jsonLd = buildLocalBusinessJsonLd({
+    name: listing.name,
+    address: listing.address,
+    city: listing.city,
+    phone: listing.phone,
+    website: listing.website,
+    starRating: listing.starRating,
+    reviewCount: listing.reviewCount,
+    latitude: listing.latitude,
+    longitude: listing.longitude,
+  })
+
   return (
     <div className="mx-auto max-w-[800px] py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Company Name */}
       <h1 className="font-sans text-2xl font-bold text-foreground md:text-[2rem]">
         {listing.name}

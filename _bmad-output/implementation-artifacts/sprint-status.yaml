@@ -77,8 +77,8 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6: SEO Infrastructure & Search Analytics
-  epic-6: backlog
-  6-1-seo-metadata-schema-markup: backlog
+  epic-6: in-progress
+  6-1-seo-metadata-schema-markup: done
   6-2-xml-sitemap-crawl-control: backlog
   6-3-search-analytics-logging: backlog
   epic-6-retrospective: optional

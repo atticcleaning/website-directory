@@ -5,6 +5,7 @@ import Link from "next/link"
 import StarRating from "@/components/star-rating"
 import FilterToolbar from "@/components/filter-toolbar"
 import prisma from "@/lib/prisma"
+import { buildMetadata } from "@/lib/seo"
 import type { ListingResult } from "@/types"
 
 const getCity = cache(async function getCity(citySlug: string) {
@@ -41,16 +42,17 @@ export async function generateMetadata({
   const city = await getCity(citySlug)
 
   if (!city) {
-    return { title: "City Not Found | AtticCleaning.com" }
+    return { title: "City Not Found | AtticCleaning.com", robots: { index: false } }
   }
 
   const companyCount = city.listings.length
   const avgRating = computeAvgRating(city.listings)
 
-  return {
+  return buildMetadata({
     title: `Top Attic Cleaning Companies in ${city.name}, ${city.state} | AtticCleaning.com`,
     description: `Find ${companyCount} top-rated attic cleaning ${companyCount === 1 ? "company" : "companies"} in ${city.name}, ${city.state}. Average rating: ${avgRating.toFixed(1)} stars.`,
-  }
+    path: `/${citySlug}`,
+  })
 }
 
 function computeAvgRating(listings: { starRating: number }[]): number {

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getArticleSlugs, getArticleBySlug, getAllArticles } from "@/lib/mdx"
 import ArticleCard from "@/components/article-card"
+import { buildMetadata } from "@/lib/seo"
 
 const getCachedArticle = cache(async function getCachedArticle(slug: string) {
   return getArticleBySlug(slug)
@@ -23,13 +24,14 @@ export async function generateMetadata({
   const article = await getCachedArticle(slug)
 
   if (!article) {
-    return { title: "Article Not Found | AtticCleaning.com" }
+    return { title: "Article Not Found | AtticCleaning.com", robots: { index: false } }
   }
 
-  return {
+  return buildMetadata({
     title: `${article.frontmatter.title} | AtticCleaning.com`,
     description: article.frontmatter.excerpt,
-  }
+    path: `/articles/${slug}`,
+  })
 }
 
 function formatDate(dateStr: string): string {
