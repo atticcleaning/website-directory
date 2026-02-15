@@ -92,8 +92,8 @@ development_status:
   epic-7-retrospective: optional
 
   # Epic 8: Data Population & Multi-Market Expansion
-  epic-8: backlog
-  8-1-outscraper-api-configuration-metro-target-list: backlog
+  epic-8: in-progress
+  8-1-outscraper-api-configuration-metro-target-list: done
   8-2-batch-import-wave-1-top-10-metros: backlog
   8-3-batch-import-wave-2-metros-11-25: backlog
   8-4-data-quality-audit-enrichment: backlog

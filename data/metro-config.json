@@ -1,0 +1,279 @@
+{
+  "metros": [
+    {
+      "key": "phoenix-az",
+      "city": "Phoenix",
+      "state": "AZ",
+      "region": "Southwest",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, Phoenix, AZ",
+        "attic insulation, Phoenix, AZ"
+      ]
+    },
+    {
+      "key": "los-angeles-ca",
+      "city": "Los Angeles",
+      "state": "CA",
+      "region": "West Coast",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, Los Angeles, CA",
+        "attic insulation, Los Angeles, CA"
+      ]
+    },
+    {
+      "key": "houston-tx",
+      "city": "Houston",
+      "state": "TX",
+      "region": "Gulf Coast",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, Houston, TX",
+        "attic insulation, Houston, TX"
+      ]
+    },
+    {
+      "key": "dallas-tx",
+      "city": "Dallas",
+      "state": "TX",
+      "region": "South Central",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, Dallas, TX",
+        "attic insulation, Dallas, TX"
+      ]
+    },
+    {
+      "key": "atlanta-ga",
+      "city": "Atlanta",
+      "state": "GA",
+      "region": "Southeast",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, Atlanta, GA",
+        "attic insulation, Atlanta, GA"
+      ]
+    },
+    {
+      "key": "chicago-il",
+      "city": "Chicago",
+      "state": "IL",
+      "region": "Midwest",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, Chicago, IL",
+        "attic insulation, Chicago, IL"
+      ]
+    },
+    {
+      "key": "denver-co",
+      "city": "Denver",
+      "state": "CO",
+      "region": "Mountain West",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Denver, CO",
+        "attic insulation, Denver, CO"
+      ]
+    },
+    {
+      "key": "las-vegas-nv",
+      "city": "Las Vegas",
+      "state": "NV",
+      "region": "Southwest",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Las Vegas, NV",
+        "attic insulation, Las Vegas, NV"
+      ]
+    },
+    {
+      "key": "san-antonio-tx",
+      "city": "San Antonio",
+      "state": "TX",
+      "region": "South Central",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, San Antonio, TX",
+        "attic insulation, San Antonio, TX"
+      ]
+    },
+    {
+      "key": "miami-fl",
+      "city": "Miami",
+      "state": "FL",
+      "region": "Southeast",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, Miami, FL",
+        "attic insulation, Miami, FL"
+      ]
+    },
+    {
+      "key": "tampa-fl",
+      "city": "Tampa",
+      "state": "FL",
+      "region": "Southeast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Tampa, FL",
+        "attic insulation, Tampa, FL"
+      ]
+    },
+    {
+      "key": "orlando-fl",
+      "city": "Orlando",
+      "state": "FL",
+      "region": "Southeast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Orlando, FL",
+        "attic insulation, Orlando, FL"
+      ]
+    },
+    {
+      "key": "charlotte-nc",
+      "city": "Charlotte",
+      "state": "NC",
+      "region": "Southeast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Charlotte, NC",
+        "attic insulation, Charlotte, NC"
+      ]
+    },
+    {
+      "key": "nashville-tn",
+      "city": "Nashville",
+      "state": "TN",
+      "region": "Southeast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Nashville, TN",
+        "attic insulation, Nashville, TN"
+      ]
+    },
+    {
+      "key": "austin-tx",
+      "city": "Austin",
+      "state": "TX",
+      "region": "South Central",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Austin, TX",
+        "attic insulation, Austin, TX"
+      ]
+    },
+    {
+      "key": "san-diego-ca",
+      "city": "San Diego",
+      "state": "CA",
+      "region": "West Coast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, San Diego, CA",
+        "attic insulation, San Diego, CA"
+      ]
+    },
+    {
+      "key": "sacramento-ca",
+      "city": "Sacramento",
+      "state": "CA",
+      "region": "West Coast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Sacramento, CA",
+        "attic insulation, Sacramento, CA"
+      ]
+    },
+    {
+      "key": "new-york-ny",
+      "city": "New York",
+      "state": "NY",
+      "region": "Northeast",
+      "tier": "high",
+      "searchQueries": [
+        "attic cleaning, New York, NY",
+        "attic insulation, New York, NY"
+      ]
+    },
+    {
+      "key": "philadelphia-pa",
+      "city": "Philadelphia",
+      "state": "PA",
+      "region": "Northeast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Philadelphia, PA",
+        "attic insulation, Philadelphia, PA"
+      ]
+    },
+    {
+      "key": "jacksonville-fl",
+      "city": "Jacksonville",
+      "state": "FL",
+      "region": "Southeast",
+      "tier": "low",
+      "searchQueries": [
+        "attic cleaning, Jacksonville, FL",
+        "attic insulation, Jacksonville, FL"
+      ]
+    },
+    {
+      "key": "columbus-oh",
+      "city": "Columbus",
+      "state": "OH",
+      "region": "Midwest",
+      "tier": "low",
+      "searchQueries": [
+        "attic cleaning, Columbus, OH",
+        "attic insulation, Columbus, OH"
+      ]
+    },
+    {
+      "key": "indianapolis-in",
+      "city": "Indianapolis",
+      "state": "IN",
+      "region": "Midwest",
+      "tier": "low",
+      "searchQueries": [
+        "attic cleaning, Indianapolis, IN",
+        "attic insulation, Indianapolis, IN"
+      ]
+    },
+    {
+      "key": "san-francisco-ca",
+      "city": "San Francisco",
+      "state": "CA",
+      "region": "West Coast",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, San Francisco, CA",
+        "attic insulation, San Francisco, CA"
+      ]
+    },
+    {
+      "key": "seattle-wa",
+      "city": "Seattle",
+      "state": "WA",
+      "region": "Pacific NW",
+      "tier": "medium",
+      "searchQueries": [
+        "attic cleaning, Seattle, WA",
+        "attic insulation, Seattle, WA"
+      ]
+    },
+    {
+      "key": "minneapolis-mn",
+      "city": "Minneapolis",
+      "state": "MN",
+      "region": "Midwest",
+      "tier": "low",
+      "searchQueries": [
+        "attic cleaning, Minneapolis, MN",
+        "attic insulation, Minneapolis, MN"
+      ]
+    }
+  ]
+}

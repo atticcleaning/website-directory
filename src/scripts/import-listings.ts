@@ -244,7 +244,7 @@ function resolveReviewField(row: Record<string, unknown>, canonical: string): un
 
 // ─── Main Import Logic ─────────────────────────────────────
 
-interface ImportSummary {
+export interface ImportSummary {
   totalProcessed: number
   listingsAdded: number
   listingsUpdated: number
@@ -253,12 +253,8 @@ interface ImportSummary {
   reviewsImported: number
 }
 
-async function main() {
-  const args = parseArgs(process.argv)
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
-  const prisma = new PrismaClient({ adapter })
-
-  const summary: ImportSummary = {
+export function emptyImportSummary(): ImportSummary {
+  return {
     totalProcessed: 0,
     listingsAdded: 0,
     listingsUpdated: 0,
@@ -266,342 +262,416 @@ async function main() {
     citiesCreated: 0,
     reviewsImported: 0,
   }
+}
 
-  try {
-    // ── Fetch business data ──────────────────────────────
+export function mergeImportSummaries(target: ImportSummary, source: ImportSummary): void {
+  target.totalProcessed += source.totalProcessed
+  target.listingsAdded += source.listingsAdded
+  target.listingsUpdated += source.listingsUpdated
+  target.rejected += source.rejected
+  target.citiesCreated += source.citiesCreated
+  target.reviewsImported += source.reviewsImported
+}
 
-    let businesses: Record<string, unknown>[]
+export function printImportSummary(summary: ImportSummary, label: string = "Import Summary", showReviews: boolean = false): void {
+  console.log(`\n═══════════════════════════════════════`)
+  console.log(`  ${label}`)
+  console.log(`═══════════════════════════════════════`)
+  console.log(`  Total processed:    ${summary.totalProcessed}`)
+  console.log(`  Listings added:     ${summary.listingsAdded}`)
+  console.log(`  Listings updated:   ${summary.listingsUpdated}`)
+  console.log(`  Records rejected:   ${summary.rejected}`)
+  console.log(`  Cities created:     ${summary.citiesCreated}`)
+  if (showReviews) {
+    console.log(`  Reviews imported:   ${summary.reviewsImported}`)
+  }
+  console.log(`═══════════════════════════════════════`)
+}
 
-    if (args.filePath) {
-      console.log(`Reading JSON file: ${args.filePath}`)
-      const raw = readFileSync(args.filePath, "utf-8")
-      // Strip BOM if present
-      const content = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw
-      const parsed = JSON.parse(content)
+export interface ImportOptions {
+  queries: string[]
+  filePath?: string | null
+  withReviews: boolean
+  limit: number
+}
 
-      if (Array.isArray(parsed)) {
-        businesses = parsed
-      } else if (parsed && typeof parsed === "object" && Array.isArray(parsed.data)) {
-        // Handle { data: [...] } wrapper from Outscraper exports
-        businesses = parsed.data
-      } else {
-        console.error("Error: JSON file must be an array or an object with a 'data' array.")
-        process.exit(1)
-      }
-      console.log(`  → ${businesses.length} businesses loaded from file`)
+/**
+ * Shared cache for batch imports. Pre-load once, pass to multiple runImport calls
+ * to avoid re-querying all cities/listings on each invocation.
+ */
+export interface ImportCache {
+  cityCache: Map<string, { id: string }>
+  existingPlaceIds: Set<string>
+}
+
+/**
+ * Initialize shared import cache by loading all existing cities and listing place IDs.
+ */
+export async function initImportCache(prisma: PrismaClient): Promise<ImportCache> {
+  const cityCache = new Map<string, { id: string }>()
+  const existingCities = await prisma.city.findMany({ select: { id: true, slug: true } })
+  for (const city of existingCities) {
+    cityCache.set(city.slug, { id: city.id })
+  }
+
+  const existingPlaceIds = new Set(
+    (await prisma.listing.findMany({ select: { googlePlaceId: true } })).map((l) => l.googlePlaceId)
+  )
+
+  return { cityCache, existingPlaceIds }
+}
+
+/**
+ * Core import function. Fetches listings from Outscraper API or a local file,
+ * validates, deduplicates, and upserts them into the database. Optionally imports reviews.
+ *
+ * @param prisma - Connected PrismaClient instance
+ * @param options - Import options (queries, filePath, withReviews, limit)
+ * @param cache - Optional shared cache for batch operations (avoids re-querying per call)
+ * @returns ImportSummary with counts of processed, added, updated, rejected, etc.
+ */
+export async function runImport(prisma: PrismaClient, options: ImportOptions, cache?: ImportCache): Promise<ImportSummary> {
+  const summary = emptyImportSummary()
+
+  // ── Fetch business data ──────────────────────────────
+
+  let businesses: Record<string, unknown>[]
+
+  if (options.filePath) {
+    console.log(`Reading JSON file: ${options.filePath}`)
+    const raw = readFileSync(options.filePath, "utf-8")
+    // Strip BOM if present
+    const content = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw
+    const parsed = JSON.parse(content)
+
+    if (Array.isArray(parsed)) {
+      businesses = parsed
+    } else if (parsed && typeof parsed === "object" && Array.isArray(parsed.data)) {
+      // Handle { data: [...] } wrapper from Outscraper exports
+      businesses = parsed.data
     } else {
-      businesses = []
-      for (const query of args.queries) {
-        console.log(`Querying Outscraper: "${query}"...`)
-        try {
-          const results = await outscrapeSearch(query, args.limit)
-          console.log(`  → ${results.length} businesses found`)
-          businesses.push(...results)
-        } catch (err) {
-          console.error(`  ✗ Failed to fetch "${query}": ${err instanceof Error ? err.message : err}`)
-        }
-      }
-
-      if (businesses.length === 0) {
-        console.error("No businesses fetched from any query. Exiting.")
-        process.exit(1)
+      throw new Error("JSON file must be an array or an object with a 'data' array.")
+    }
+    console.log(`  → ${businesses.length} businesses loaded from file`)
+  } else {
+    businesses = []
+    for (const query of options.queries) {
+      console.log(`Querying Outscraper: "${query}"...`)
+      try {
+        const results = await outscrapeSearch(query, options.limit)
+        console.log(`  → ${results.length} businesses found`)
+        businesses.push(...results)
+      } catch (err) {
+        console.error(`  ✗ Failed to fetch "${query}": ${err instanceof Error ? err.message : err}`)
       }
     }
 
-    // ── Deduplicate by place_id before processing ────────
-
-    const seenPlaceIds = new Set<string>()
-    const uniqueBusinesses: Record<string, unknown>[] = []
-    for (const biz of businesses) {
-      const placeId = resolveString(biz, "place_id")
-      if (!placeId) continue
-      if (seenPlaceIds.has(placeId)) continue
-      seenPlaceIds.add(placeId)
-      uniqueBusinesses.push(biz)
+    if (businesses.length === 0) {
+      console.warn("No businesses fetched from any query.")
+      return summary
     }
+  }
 
-    if (uniqueBusinesses.length < businesses.length) {
-      console.log(`Deduplicated: ${businesses.length} → ${uniqueBusinesses.length} unique businesses`)
-    }
+  // ── Deduplicate by place_id before processing ────────
 
-    // ── City cache for in-memory resolution ──────────────
+  const seenPlaceIds = new Set<string>()
+  const uniqueBusinesses: Record<string, unknown>[] = []
+  for (const biz of businesses) {
+    const placeId = resolveString(biz, "place_id")
+    if (!placeId) continue
+    if (seenPlaceIds.has(placeId)) continue
+    seenPlaceIds.add(placeId)
+    uniqueBusinesses.push(biz)
+  }
 
-    const cityCache = new Map<string, { id: string }>()
+  if (uniqueBusinesses.length < businesses.length) {
+    console.log(`Deduplicated: ${businesses.length} → ${uniqueBusinesses.length} unique businesses`)
+  }
 
-    // Pre-load existing cities into cache
+  // ── City cache for in-memory resolution ──────────────
+  // Use shared cache if provided, otherwise load fresh
+
+  const cityCache = cache?.cityCache ?? new Map<string, { id: string }>()
+  const existingPlaceIds = cache?.existingPlaceIds ?? new Set<string>()
+
+  if (!cache) {
     const existingCities = await prisma.city.findMany({ select: { id: true, slug: true } })
     for (const city of existingCities) {
       cityCache.set(city.slug, { id: city.id })
     }
 
-    // ── Track existing listings for add vs update count ──
+    const listings = await prisma.listing.findMany({ select: { googlePlaceId: true } })
+    for (const l of listings) {
+      existingPlaceIds.add(l.googlePlaceId)
+    }
+  }
 
-    const existingPlaceIds = new Set(
-      (await prisma.listing.findMany({ select: { googlePlaceId: true } })).map((l) => l.googlePlaceId)
+  // ── Process each business ────────────────────────────
+
+  const importedListings = new Map<string, { id: string; googlePlaceId: string }>()
+
+  for (let i = 0; i < uniqueBusinesses.length; i++) {
+    const biz = uniqueBusinesses[i]
+    summary.totalProcessed++
+
+    // Progress logging
+    if ((i + 1) % 100 === 0 || i === uniqueBusinesses.length - 1) {
+      console.log(`Processing ${i + 1}/${uniqueBusinesses.length}...`)
+    }
+
+    // ── Extract and validate required fields ─────────
+
+    const placeId = resolveString(biz, "place_id")
+    const name = resolveString(biz, "name")
+    const address = resolveString(biz, "address")
+    const phone = resolveString(biz, "phone")
+    const ratingVal = resolveNumber(biz, "rating")
+
+    if (!placeId || !name || !address || !phone || ratingVal === undefined) {
+      const missing = [
+        !placeId && "place_id",
+        !name && "name",
+        !address && "address",
+        !phone && "phone",
+        ratingVal === undefined && "rating",
+      ].filter(Boolean)
+      console.warn(`  ⚠ Rejected (missing: ${missing.join(", ")}): ${name || "unknown"} [row ${i + 1}]`)
+      summary.rejected++
+      continue
+    }
+
+    // ── Extract optional fields ──────────────────────
+
+    const website = resolveString(biz, "website") || null
+    const reviewCount = resolveNumber(biz, "reviews_count") ?? 0
+    const lat = resolveNumber(biz, "latitude")
+    const lng = resolveNumber(biz, "longitude")
+    const cityName = resolveString(biz, "city")
+    const stateRaw = resolveString(biz, "state")
+    const description = resolveString(biz, "description") || null
+
+    // Subtypes: can be string or array
+    const subtypesRaw = resolveField(biz, "subtypes")
+    const subtypes = subtypesRaw
+      ? Array.isArray(subtypesRaw)
+        ? (subtypesRaw as string[]).join(", ")
+        : String(subtypesRaw)
+      : null
+
+    // Working hours: can be object or string
+    const hoursRaw = resolveField(biz, "working_hours")
+    const workingHours = hoursRaw
+      ? typeof hoursRaw === "object"
+        ? JSON.stringify(hoursRaw)
+        : String(hoursRaw)
+      : null
+
+    if (!lat || !lng || !cityName || !stateRaw) {
+      console.warn(`  ⚠ Rejected (missing location data): ${name} [row ${i + 1}]`)
+      summary.rejected++
+      continue
+    }
+
+    // ── Resolve state code ───────────────────────────
+
+    const stateCode = toStateCode(stateRaw)
+    if (!stateCode) {
+      console.warn(`  ⚠ Rejected (unknown state: "${stateRaw}"): ${name} [row ${i + 1}]`)
+      summary.rejected++
+      continue
+    }
+
+    // ── Resolve city (cached) ────────────────────────
+
+    const cSlug = makeCitySlug(cityName, stateCode)
+    let cityRecord = cityCache.get(cSlug)
+
+    if (!cityRecord) {
+      const city = await prisma.city.upsert({
+        where: { slug: cSlug },
+        create: { name: cityName, state: stateCode, slug: cSlug, latitude: lat, longitude: lng },
+        update: {},
+      })
+      cityRecord = { id: city.id }
+      cityCache.set(cSlug, cityRecord)
+      summary.citiesCreated++
+    }
+
+    // ── Generate listing slug (unique within city) ───
+
+    const baseSlug = slugify(name)
+    let listingSlug = baseSlug
+    let suffix = 2
+
+    // Check for slug collisions within the city
+    while (true) {
+      const existing = await prisma.listing.findUnique({
+        where: { cityId_slug: { cityId: cityRecord.id, slug: listingSlug } },
+        select: { googlePlaceId: true },
+      })
+      if (!existing || existing.googlePlaceId === placeId) break
+      listingSlug = `${baseSlug}-${suffix}`
+      suffix++
+    }
+
+    // ── Upsert listing ──────────────────────────────
+
+    const isUpdate = existingPlaceIds.has(placeId)
+
+    const listing = await prisma.listing.upsert({
+      where: { googlePlaceId: placeId },
+      create: {
+        googlePlaceId: placeId,
+        name,
+        slug: listingSlug,
+        starRating: ratingVal,
+        reviewCount,
+        phone,
+        website,
+        address,
+        description,
+        subtypes,
+        workingHours,
+        latitude: lat,
+        longitude: lng,
+        cityId: cityRecord.id,
+      },
+      update: {
+        name,
+        starRating: ratingVal,
+        reviewCount,
+        phone,
+        website,
+        address,
+        description,
+        subtypes,
+        workingHours,
+        latitude: lat,
+        longitude: lng,
+      },
+    })
+
+    importedListings.set(placeId, { id: listing.id, googlePlaceId: placeId })
+
+    if (isUpdate) {
+      summary.listingsUpdated++
+    } else {
+      summary.listingsAdded++
+      existingPlaceIds.add(placeId)
+    }
+  }
+
+  // ── Import reviews if requested ─────────────────────
+
+  if (options.withReviews && !options.filePath) {
+    console.log("\nFetching reviews for imported listings...")
+
+    // Pre-load existing reviews for deduplication
+    const listingIds = [...importedListings.values()].map((l) => l.id)
+    const existingReviews = await prisma.review.findMany({
+      where: { listingId: { in: listingIds } },
+      select: { listingId: true, authorName: true, publishedAt: true },
+    })
+    const existingReviewKeys = new Set(
+      existingReviews.map((r) => `${r.listingId}|${r.authorName}|${r.publishedAt.toISOString()}`)
     )
 
-    // ── Process each business ────────────────────────────
-
-    const importedListings = new Map<string, { id: string; googlePlaceId: string }>()
-
-    for (let i = 0; i < uniqueBusinesses.length; i++) {
-      const biz = uniqueBusinesses[i]
-      summary.totalProcessed++
-
-      // Progress logging
-      if ((i + 1) % 100 === 0 || i === uniqueBusinesses.length - 1) {
-        console.log(`Processing ${i + 1}/${uniqueBusinesses.length}...`)
+    let reviewIdx = 0
+    for (const [placeId, listing] of importedListings) {
+      reviewIdx++
+      if (reviewIdx % 10 === 0) {
+        console.log(`  Fetching reviews ${reviewIdx}/${importedListings.size}...`)
       }
 
-      // ── Extract and validate required fields ─────────
-
-      const placeId = resolveString(biz, "place_id")
-      const name = resolveString(biz, "name")
-      const address = resolveString(biz, "address")
-      const phone = resolveString(biz, "phone")
-      const ratingVal = resolveNumber(biz, "rating")
-
-      if (!placeId || !name || !address || !phone || ratingVal === undefined) {
-        const missing = [
-          !placeId && "place_id",
-          !name && "name",
-          !address && "address",
-          !phone && "phone",
-          ratingVal === undefined && "rating",
-        ].filter(Boolean)
-        console.warn(`  ⚠ Rejected (missing: ${missing.join(", ")}): ${name || "unknown"} [row ${i + 1}]`)
-        summary.rejected++
-        continue
+      // Rate-limit: 500ms delay between review API calls to avoid 429s
+      if (reviewIdx > 1) {
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
 
-      // ── Extract optional fields ──────────────────────
+      try {
+        const reviews = await outscrapeReviews(placeId)
 
-      const website = resolveString(biz, "website") || null
-      const reviewCount = resolveNumber(biz, "reviews_count") ?? 0
-      const lat = resolveNumber(biz, "latitude")
-      const lng = resolveNumber(biz, "longitude")
-      const cityName = resolveString(biz, "city")
-      const stateRaw = resolveString(biz, "state")
-      const description = resolveString(biz, "description") || null
+        const batch: {
+          listingId: string
+          authorName: string
+          rating: number
+          text: string | null
+          publishedAt: Date
+        }[] = []
 
-      // Subtypes: can be string or array
-      const subtypesRaw = resolveField(biz, "subtypes")
-      const subtypes = subtypesRaw
-        ? Array.isArray(subtypesRaw)
-          ? (subtypesRaw as string[]).join(", ")
-          : String(subtypesRaw)
-        : null
+        for (const rev of reviews) {
+          const authorName = String(resolveReviewField(rev, "author_name") ?? "Anonymous").trim()
+          const reviewRating = Number(resolveReviewField(rev, "rating") ?? 0)
+          const textRaw = resolveReviewField(rev, "text")
+          const reviewText = textRaw ? String(textRaw).trim() || null : null
+          const publishedAtRaw = resolveReviewField(rev, "published_at")
 
-      // Working hours: can be object or string
-      const hoursRaw = resolveField(biz, "working_hours")
-      const workingHours = hoursRaw
-        ? typeof hoursRaw === "object"
-          ? JSON.stringify(hoursRaw)
-          : String(hoursRaw)
-        : null
+          if (!publishedAtRaw) continue
 
-      if (!lat || !lng || !cityName || !stateRaw) {
-        console.warn(`  ⚠ Rejected (missing location data): ${name} [row ${i + 1}]`)
-        summary.rejected++
-        continue
-      }
+          const publishedAt = new Date(String(publishedAtRaw))
+          if (isNaN(publishedAt.getTime())) continue
 
-      // ── Resolve state code ───────────────────────────
+          const dedupKey = `${listing.id}|${authorName}|${publishedAt.toISOString()}`
+          if (existingReviewKeys.has(dedupKey)) continue
 
-      const stateCode = toStateCode(stateRaw)
-      if (!stateCode) {
-        console.warn(`  ⚠ Rejected (unknown state: "${stateRaw}"): ${name} [row ${i + 1}]`)
-        summary.rejected++
-        continue
-      }
+          batch.push({
+            listingId: listing.id,
+            authorName,
+            rating: reviewRating,
+            text: reviewText,
+            publishedAt,
+          })
 
-      // ── Resolve city (cached) ────────────────────────
-
-      const cSlug = makeCitySlug(cityName, stateCode)
-      let cityRecord = cityCache.get(cSlug)
-
-      if (!cityRecord) {
-        const city = await prisma.city.upsert({
-          where: { slug: cSlug },
-          create: { name: cityName, state: stateCode, slug: cSlug, latitude: lat, longitude: lng },
-          update: {},
-        })
-        cityRecord = { id: city.id }
-        cityCache.set(cSlug, cityRecord)
-        summary.citiesCreated++
-      }
-
-      // ── Generate listing slug (unique within city) ───
-
-      const baseSlug = slugify(name)
-      let listingSlug = baseSlug
-      let suffix = 2
-
-      // Check for slug collisions within the city
-      while (true) {
-        const existing = await prisma.listing.findUnique({
-          where: { cityId_slug: { cityId: cityRecord.id, slug: listingSlug } },
-          select: { googlePlaceId: true },
-        })
-        if (!existing || existing.googlePlaceId === placeId) break
-        listingSlug = `${baseSlug}-${suffix}`
-        suffix++
-      }
-
-      // ── Upsert listing ──────────────────────────────
-
-      const isUpdate = existingPlaceIds.has(placeId)
-
-      const listing = await prisma.listing.upsert({
-        where: { googlePlaceId: placeId },
-        create: {
-          googlePlaceId: placeId,
-          name,
-          slug: listingSlug,
-          starRating: ratingVal,
-          reviewCount,
-          phone,
-          website,
-          address,
-          description,
-          subtypes,
-          workingHours,
-          latitude: lat,
-          longitude: lng,
-          cityId: cityRecord.id,
-        },
-        update: {
-          name,
-          starRating: ratingVal,
-          reviewCount,
-          phone,
-          website,
-          address,
-          description,
-          subtypes,
-          workingHours,
-          latitude: lat,
-          longitude: lng,
-        },
-      })
-
-      importedListings.set(placeId, { id: listing.id, googlePlaceId: placeId })
-
-      if (isUpdate) {
-        summary.listingsUpdated++
-      } else {
-        summary.listingsAdded++
-      }
-    }
-
-    // ── Import reviews if requested ─────────────────────
-
-    if (args.withReviews && !args.filePath) {
-      console.log("\nFetching reviews for imported listings...")
-
-      // Pre-load existing reviews for deduplication
-      const listingIds = [...importedListings.values()].map((l) => l.id)
-      const existingReviews = await prisma.review.findMany({
-        where: { listingId: { in: listingIds } },
-        select: { listingId: true, authorName: true, publishedAt: true },
-      })
-      const existingReviewKeys = new Set(
-        existingReviews.map((r) => `${r.listingId}|${r.authorName}|${r.publishedAt.toISOString()}`)
-      )
-
-      let reviewIdx = 0
-      for (const [placeId, listing] of importedListings) {
-        reviewIdx++
-        if (reviewIdx % 10 === 0) {
-          console.log(`  Fetching reviews ${reviewIdx}/${importedListings.size}...`)
+          existingReviewKeys.add(dedupKey)
         }
 
-        // Rate-limit: 500ms delay between review API calls to avoid 429s
-        if (reviewIdx > 1) {
-          await new Promise((resolve) => setTimeout(resolve, 500))
+        if (batch.length > 0) {
+          await prisma.review.createMany({ data: batch })
+          summary.reviewsImported += batch.length
         }
-
-        try {
-          const reviews = await outscrapeReviews(placeId)
-
-          const batch: {
-            listingId: string
-            authorName: string
-            rating: number
-            text: string | null
-            publishedAt: Date
-          }[] = []
-
-          for (const rev of reviews) {
-            const authorName = String(resolveReviewField(rev, "author_name") ?? "Anonymous").trim()
-            const reviewRating = Number(resolveReviewField(rev, "rating") ?? 0)
-            const textRaw = resolveReviewField(rev, "text")
-            const reviewText = textRaw ? String(textRaw).trim() || null : null
-            const publishedAtRaw = resolveReviewField(rev, "published_at")
-
-            if (!publishedAtRaw) continue
-
-            const publishedAt = new Date(String(publishedAtRaw))
-            if (isNaN(publishedAt.getTime())) continue
-
-            const dedupKey = `${listing.id}|${authorName}|${publishedAt.toISOString()}`
-            if (existingReviewKeys.has(dedupKey)) continue
-
-            batch.push({
-              listingId: listing.id,
-              authorName,
-              rating: reviewRating,
-              text: reviewText,
-              publishedAt,
-            })
-
-            existingReviewKeys.add(dedupKey)
-          }
-
-          if (batch.length > 0) {
-            await prisma.review.createMany({ data: batch })
-            summary.reviewsImported += batch.length
-          }
-        } catch (err) {
-          console.warn(`  ⚠ Failed to fetch reviews for ${placeId}: ${err instanceof Error ? err.message : err}`)
-        }
+      } catch (err) {
+        console.warn(`  ⚠ Failed to fetch reviews for ${placeId}: ${err instanceof Error ? err.message : err}`)
       }
     }
+  }
 
-    // ── Summary Report ──────────────────────────────────
+  return summary
+}
 
-    console.log("\n═══════════════════════════════════════")
-    console.log("  Import Summary")
-    console.log("═══════════════════════════════════════")
-    console.log(`  Total processed:    ${summary.totalProcessed}`)
-    console.log(`  Listings added:     ${summary.listingsAdded}`)
-    console.log(`  Listings updated:   ${summary.listingsUpdated}`)
-    console.log(`  Records rejected:   ${summary.rejected}`)
-    console.log(`  Cities created:     ${summary.citiesCreated}`)
-    if (args.withReviews) {
-      console.log(`  Reviews imported:   ${summary.reviewsImported}`)
-    }
-    console.log("═══════════════════════════════════════")
+/**
+ * Print database totals and a sample verification for a given import run.
+ */
+export async function printDatabaseTotals(prisma: PrismaClient): Promise<void> {
+  const totalListings = await prisma.listing.count()
+  const totalCities = await prisma.city.count()
+  const totalReviews = await prisma.review.count()
+  console.log(`\nDatabase totals: ${totalListings} listings, ${totalCities} cities, ${totalReviews} reviews`)
+}
 
-    // ── Spot-check verification ─────────────────────────
+/**
+ * Create a PrismaClient connected to DATABASE_URL.
+ */
+export function createPrismaClient(): PrismaClient {
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
+  return new PrismaClient({ adapter })
+}
 
-    const totalListings = await prisma.listing.count()
-    const totalCities = await prisma.city.count()
-    const totalReviews = await prisma.review.count()
-    console.log(`\nDatabase totals: ${totalListings} listings, ${totalCities} cities, ${totalReviews} reviews`)
+// ─── CLI Entry Point ──────────────────────────────────────
 
-    if (importedListings.size > 0) {
-      const [, sampleListing] = [...importedListings.entries()][0]
-      const verified = await prisma.listing.findUnique({
-        where: { id: sampleListing.id },
-        include: { city: true },
-      })
-      if (verified) {
-        console.log(
-          `Verification: ${verified.name} → ${verified.city.name}, ${verified.city.state} (${verified.city.slug})`
-        )
-      }
-    }
+async function main() {
+  const args = parseArgs(process.argv)
+  const prisma = createPrismaClient()
+
+  try {
+    const summary = await runImport(prisma, {
+      queries: args.queries,
+      filePath: args.filePath,
+      withReviews: args.withReviews,
+      limit: args.limit,
+    })
+
+    printImportSummary(summary, "Import Summary", args.withReviews)
+    await printDatabaseTotals(prisma)
   } finally {
     await prisma.$disconnect()
   }
