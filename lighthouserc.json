@@ -2,7 +2,9 @@
   "ci": {
     "collect": {
       "url": [
-        "http://localhost:3000/"
+        "http://localhost:3000/",
+        "http://localhost:3000/phoenix-az",
+        "http://localhost:3000/articles/choosing-attic-cleaning-company"
       ],
       "numberOfRuns": 1,
       "settings": {

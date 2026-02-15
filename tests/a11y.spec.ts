@@ -4,6 +4,8 @@ import AxeBuilder from "@axe-core/playwright";
 const pages = [
   { name: "Homepage", path: "/" },
   { name: "Search results", path: "/search?q=phoenix" },
+  { name: "City landing page", path: "/phoenix-az" },
+  { name: "Article page", path: "/articles/choosing-attic-cleaning-company" },
 ];
 
 for (const { name, path } of pages) {
