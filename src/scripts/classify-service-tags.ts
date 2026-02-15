@@ -24,6 +24,7 @@ const SERVICE_KEYWORDS: Record<ServiceType, string[]> = {
     "remove insulation", "replace insulation",
     "blown-in", "fiberglass", "cellulose", "batt",
     "spray foam", "radiant barrier", "blown in",
+    "insulator",
   ],
   DECONTAMINATION: [
     "decontamination", "decontaminate", "sanitize", "sanitization",
@@ -67,11 +68,15 @@ function classifyListing(listing: {
   description: string | null
   subtypes: string | null
 }): ServiceType[] {
-  // Primary: use description + subtypes (avoids false positives from company names)
-  const hasPrimaryFields = listing.description || listing.subtypes
-  const text = hasPrimaryFields
-    ? [listing.description, listing.subtypes].filter(Boolean).join(" ").toLowerCase()
-    : listing.name.toLowerCase() // Fallback: name only when no description/subtypes
+  // Always include name — it often contains the most relevant service keywords.
+  // Trade-off: original design excluded names to avoid false positives (e.g. "Mold Inspection"
+  // matching MOLD_REMEDIATION). Including names is necessary to reach 80%+ classification rate
+  // since many imported listings have only generic subtypes like "Contractor". Acceptable because
+  // all listings are pre-filtered by attic-related Outscraper search queries.
+  const text = [listing.name, listing.description, listing.subtypes]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
 
   const matched: ServiceType[] = []
 

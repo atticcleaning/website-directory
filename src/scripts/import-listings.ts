@@ -1,5 +1,6 @@
 import "dotenv/config"
 import { readFileSync } from "fs"
+import { fileURLToPath } from "url"
 import { PrismaClient } from "../app/generated/prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
 
@@ -147,8 +148,7 @@ function parseArgs(argv: string[]): CliArgs {
 async function outscrapeSearch(query: string, limit: number): Promise<Record<string, unknown>[]> {
   const apiKey = process.env.OUTSCRAPER_API_KEY
   if (!apiKey) {
-    console.error("Error: OUTSCRAPER_API_KEY environment variable is not set. Check your .env file.")
-    process.exit(1)
+    throw new Error("OUTSCRAPER_API_KEY environment variable is not set.")
   }
 
   const params = new URLSearchParams({
@@ -184,16 +184,15 @@ async function outscrapeSearch(query: string, limit: number): Promise<Record<str
   return data as Record<string, unknown>[]
 }
 
-async function outscrapeReviews(placeId: string, limit: number = 100): Promise<Record<string, unknown>[]> {
+async function outscrapeReviews(query: string, limit: number = 100): Promise<Record<string, unknown>[]> {
   const apiKey = process.env.OUTSCRAPER_API_KEY
   if (!apiKey) {
-    console.error("Error: OUTSCRAPER_API_KEY environment variable is not set. Check your .env file.")
-    process.exit(1)
+    throw new Error("OUTSCRAPER_API_KEY environment variable is not set.")
   }
 
   const params = new URLSearchParams({
-    query: placeId,
-    limit: String(limit),
+    query,
+    reviewsLimit: String(limit),
     async: "false",
   })
 
@@ -207,19 +206,20 @@ async function outscrapeReviews(placeId: string, limit: number = 100): Promise<R
   clearTimeout(timeout)
 
   if (!res.ok) {
-    console.warn(`  ⚠ Reviews API error for ${placeId}: ${res.status} ${res.statusText}`)
+    console.warn(`  ⚠ Reviews API error for "${query}": ${res.status} ${res.statusText}`)
     return []
   }
 
-  const json = (await res.json()) as { data?: unknown }
+  const json = (await res.json()) as { data?: Record<string, unknown>[] }
   const data = json.data
-  if (!data || !Array.isArray(data)) return []
+  if (!data || !Array.isArray(data) || data.length === 0) return []
 
-  // Reviews response is nested: [[review1, review2, ...]]
-  if (data.length > 0 && Array.isArray(data[0])) {
-    return (data as Record<string, unknown>[][]).flat()
-  }
-  return data as Record<string, unknown>[]
+  // Reviews v3 response: data[0].reviews_data contains the review array.
+  // Only the first place match is used; secondary matches (rare with name+address) are ignored.
+  const place = data[0]
+  const reviewsData = place.reviews_data
+  if (!reviewsData || !Array.isArray(reviewsData)) return []
+  return reviewsData as Record<string, unknown>[]
 }
 
 // ─── Review Field Resolution ───────────────────────────────
@@ -408,7 +408,7 @@ export async function runImport(prisma: PrismaClient, options: ImportOptions, ca
 
   // ── Process each business ────────────────────────────
 
-  const importedListings = new Map<string, { id: string; googlePlaceId: string }>()
+  const importedListings = new Map<string, { id: string; googlePlaceId: string; name: string; address: string }>()
 
   for (let i = 0; i < uniqueBusinesses.length; i++) {
     const biz = uniqueBusinesses[i]
@@ -551,7 +551,7 @@ export async function runImport(prisma: PrismaClient, options: ImportOptions, ca
       },
     })
 
-    importedListings.set(placeId, { id: listing.id, googlePlaceId: placeId })
+    importedListings.set(placeId, { id: listing.id, googlePlaceId: placeId, name, address })
 
     if (isUpdate) {
       summary.listingsUpdated++
@@ -577,7 +577,7 @@ export async function runImport(prisma: PrismaClient, options: ImportOptions, ca
     )
 
     let reviewIdx = 0
-    for (const [placeId, listing] of importedListings) {
+    for (const [, listing] of importedListings) {
       reviewIdx++
       if (reviewIdx % 10 === 0) {
         console.log(`  Fetching reviews ${reviewIdx}/${importedListings.size}...`)
@@ -589,7 +589,8 @@ export async function runImport(prisma: PrismaClient, options: ImportOptions, ca
       }
 
       try {
-        const reviews = await outscrapeReviews(placeId)
+        const reviewQuery = `${listing.name}, ${listing.address}`
+        const reviews = await outscrapeReviews(reviewQuery)
 
         const batch: {
           listingId: string
@@ -630,7 +631,7 @@ export async function runImport(prisma: PrismaClient, options: ImportOptions, ca
           summary.reviewsImported += batch.length
         }
       } catch (err) {
-        console.warn(`  ⚠ Failed to fetch reviews for ${placeId}: ${err instanceof Error ? err.message : err}`)
+        console.warn(`  ⚠ Failed to fetch reviews for "${listing.name}": ${err instanceof Error ? err.message : err}`)
       }
     }
   }
@@ -677,7 +678,10 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error("Import failed:", e)
-  process.exit(1)
-})
+// Only run CLI when this file is executed directly (not imported by import-metro.ts)
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((e) => {
+    console.error("Import failed:", e)
+    process.exit(1)
+  })
+}
