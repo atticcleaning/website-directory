@@ -95,6 +95,69 @@ function resolveNumber(row: Record<string, unknown>, canonical: string): number 
   return isNaN(num) ? undefined : num
 }
 
+// ─── Business Type Filter ─────────────────────────────────
+// Reject businesses whose primary type is roofing, HVAC, plumbing, etc.
+// unless they also have attic/insulation signals (name or allowed subtypes).
+
+const EXCLUDED_PRIMARY_SUBTYPES = [
+  "roofing contractor",
+  "siding contractor",
+  "skylight contractor",
+  "hvac contractor",
+  "air conditioning contractor",
+  "air conditioning repair service",
+  "air conditioning system supplier",
+  "heating contractor",
+  "heating equipment supplier",
+  "furnace repair service",
+  "plumber",
+  "electrician",
+  "electrical installation service",
+  "home improvement store",
+  "hardware store",
+  "self-storage facility",
+  "home inspector",
+  "brewery",
+  "bar",
+  "appliance store",
+  "appliance repair service",
+  "hot water system supplier",
+  "gasfitter",
+  "general contractor",
+  "construction company",
+  "building firm",
+  "remodeling contractor",
+]
+
+const ALLOWED_SUBTYPES = [
+  "insulation contractor",
+  "air duct cleaning service",
+  "pest control service",
+  "animal control service",
+  "bird control service",
+]
+
+export function shouldExcludeBusiness(name: string, subtypes: string | null): boolean {
+  if (!subtypes) return false
+
+  const subtypesLower = subtypes.toLowerCase()
+  const nameLower = name.toLowerCase()
+
+  // Check if business has any excluded primary subtype
+  const hasExcludedType = EXCLUDED_PRIMARY_SUBTYPES.some((t) => subtypesLower.includes(t))
+  if (!hasExcludedType) return false
+
+  // Allow if name contains attic/insulation keywords
+  if (nameLower.includes("attic") || nameLower.includes("insulation")) return false
+
+  // Allow if has allowed subtypes (insulation, pest control, duct cleaning)
+  const hasAllowedType = ALLOWED_SUBTYPES.some((t) => subtypesLower.includes(t))
+  if (hasAllowedType) return false
+
+  // Excluded: has excluded types but no attic/insulation signals
+  return true
+}
+
 // ─── CLI Argument Parsing ──────────────────────────────────
 
 interface CliArgs {
@@ -465,6 +528,13 @@ export async function runImport(prisma: PrismaClient, options: ImportOptions, ca
         ? JSON.stringify(hoursRaw)
         : String(hoursRaw)
       : null
+
+    // ── Business type filter ─────────────────────────
+    if (shouldExcludeBusiness(name, subtypes)) {
+      console.warn(`  ⚠ Rejected (excluded business type): ${name} [row ${i + 1}]`)
+      summary.rejected++
+      continue
+    }
 
     if (!lat || !lng || !cityName || !stateRaw) {
       console.warn(`  ⚠ Rejected (missing location data): ${name} [row ${i + 1}]`)

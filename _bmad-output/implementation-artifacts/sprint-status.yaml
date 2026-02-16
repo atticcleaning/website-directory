@@ -96,7 +96,7 @@ development_status:
   8-1-outscraper-api-configuration-metro-target-list: done
   8-2-batch-import-wave-1-top-10-metros: done
   8-3-batch-import-wave-2-metros-11-25: done
-  8-4-data-quality-audit-enrichment: backlog
+  8-4-data-quality-audit-enrichment: done
   8-5-build-performance-at-scale: backlog
   epic-8-retrospective: optional
 
