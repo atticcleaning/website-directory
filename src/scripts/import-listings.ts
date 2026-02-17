@@ -100,41 +100,49 @@ function resolveNumber(row: Record<string, unknown>, canonical: string): number 
 // unless they also have attic/insulation signals (name or allowed subtypes).
 
 const EXCLUDED_PRIMARY_SUBTYPES = [
-  "roofing contractor",
-  "siding contractor",
-  "skylight contractor",
-  "hvac contractor",
-  "air conditioning contractor",
-  "air conditioning repair service",
-  "air conditioning system supplier",
-  "heating contractor",
-  "heating equipment supplier",
-  "furnace repair service",
-  "plumber",
-  "electrician",
-  "electrical installation service",
-  "home improvement store",
-  "hardware store",
-  "self-storage facility",
-  "home inspector",
-  "brewery",
-  "bar",
-  "appliance store",
-  "appliance repair service",
-  "hot water system supplier",
-  "gasfitter",
-  "general contractor",
-  "construction company",
-  "building firm",
-  "remodeling contractor",
+  // Trade contractors
+  "roofing contractor", "siding contractor", "skylight contractor",
+  "hvac contractor", "air conditioning contractor", "air conditioning repair service",
+  "air conditioning system supplier", "heating contractor", "heating equipment supplier",
+  "furnace repair service", "plumber", "electrician", "electrical installation service",
+  "general contractor", "construction company", "building firm", "remodeling contractor",
+  "masonry contractor", "bricklayer", "concrete contractor",
+  "dry wall contractor", "flooring contractor", "flooring store",
+  "garage door supplier", "painting", "painter",
+  // Retail / irrelevant
+  "home improvement store", "hardware store", "appliance store", "appliance repair service",
+  "building materials store", "building materials supplier",
+  "hot water system supplier", "gasfitter",
+  // Solar
+  "solar energy company", "solar energy system service", "solar energy equipment supplier",
+  // Landscaping / lawn
+  "landscaper", "lawn care service",
+  // Moving / storage
+  "mover", "moving and storage service", "self-storage facility", "storage facility",
+  "dumpster rental service",
+  // Cleaning services (non-attic)
+  "carpet cleaning service", "window cleaning service", "pressure washing service",
+  "house cleaning service", "cleaners", "dry cleaner", "janitorial service",
+  // Inspection
+  "home inspector", "building inspector",
+  // Completely irrelevant
+  "brewery", "bar", "restaurant", "cafe",
+  "veterinary care", "animal hospital",
+  "real estate agency", "real estate agent",
+  "insurance agency",
+  "recording studio", "video production service",
+  "furniture store", "antique store",
+  "handyman/handywoman/handyperson",
+  "home health care service", "aged care",
+  "shredding service", "consumer advice center",
 ]
 
 const ALLOWED_SUBTYPES = [
-  "insulation contractor",
+  "insulation contractor", "insulator",
   "air duct cleaning service",
-  "pest control service",
-  "animal control service",
-  "bird control service",
+  "pest control service", "animal control service", "bird control service",
+  "water damage restoration service", "fire damage restoration service",
+  "mold removal service",
 ]
 
 export function shouldExcludeBusiness(name: string, subtypes: string | null): boolean {
@@ -147,10 +155,10 @@ export function shouldExcludeBusiness(name: string, subtypes: string | null): bo
   const hasExcludedType = EXCLUDED_PRIMARY_SUBTYPES.some((t) => subtypesLower.includes(t))
   if (!hasExcludedType) return false
 
-  // Allow if name contains attic/insulation keywords
-  if (nameLower.includes("attic") || nameLower.includes("insulation")) return false
+  // Allow if name contains attic/insulation/crawlspace keywords
+  if (nameLower.includes("attic") || nameLower.includes("insulation") || nameLower.includes("crawl")) return false
 
-  // Allow if has allowed subtypes (insulation, pest control, duct cleaning)
+  // Allow if has allowed subtypes (insulation, pest control, duct cleaning, restoration)
   const hasAllowedType = ALLOWED_SUBTYPES.some((t) => subtypesLower.includes(t))
   if (hasAllowedType) return false
 
