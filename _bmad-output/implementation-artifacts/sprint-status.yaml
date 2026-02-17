@@ -92,17 +92,17 @@ development_status:
   epic-7-retrospective: optional
 
   # Epic 8: Data Population & Multi-Market Expansion
-  epic-8: in-progress
+  epic-8: done
   8-1-outscraper-api-configuration-metro-target-list: done
   8-2-batch-import-wave-1-top-10-metros: done
   8-3-batch-import-wave-2-metros-11-25: done
   8-4-data-quality-audit-enrichment: done
-  8-5-build-performance-at-scale: backlog
+  8-5-build-performance-at-scale: done
   epic-8-retrospective: optional
 
   # Epic 9: Visual Design Enhancement
-  epic-9: backlog
-  9-1-design-direction-component-audit: backlog
+  epic-9: in-progress
+  9-1-design-direction-component-audit: done
   9-2-homepage-redesign: backlog
   9-3-listing-card-search-results-enhancement: backlog
   9-4-city-landing-listing-detail-enhancement: backlog
