@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import SearchBar from "@/components/search-bar"
 import CityCard from "@/components/city-card"
 import ArticleCard from "@/components/article-card"
@@ -6,9 +7,8 @@ import prisma from "@/lib/prisma"
 import { getAllArticles } from "@/lib/mdx"
 import { buildMetadata } from "@/lib/seo"
 
-// Dynamic page — city data served fresh per request.
-// Can be cached at CDN layer (Cloudflare) in production.
-export const dynamic = "force-dynamic"
+// Revalidate hourly — homepage data only changes on build/import
+export const revalidate = 3600
 
 export function generateMetadata(): Metadata {
   return buildMetadata({
@@ -19,13 +19,7 @@ export function generateMetadata(): Metadata {
   })
 }
 
-export default async function HomePage() {
-  let articles: ReturnType<typeof getAllArticles> = []
-  try {
-    articles = getAllArticles()
-  } catch {
-    // Malformed MDX frontmatter — don't crash the homepage
-  }
+async function FeaturedCities() {
   const cities = await prisma.city.findMany({
     select: {
       name: true,
@@ -43,6 +37,63 @@ export default async function HomePage() {
     take: 8,
   })
 
+  if (cities.length === 0) return null
+
+  return (
+    <section className="mt-8">
+      <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
+        Featured Cities
+      </h2>
+      <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {cities.map((city) => (
+          <CityCard
+            key={city.slug}
+            name={city.name}
+            state={city.state}
+            slug={city.slug}
+            companyCount={city._count.listings}
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function EducationalContent() {
+  let articles: ReturnType<typeof getAllArticles> = []
+  try {
+    articles = getAllArticles()
+  } catch {
+    // Malformed MDX frontmatter — don't crash the homepage
+  }
+
+  if (articles.length === 0) return null
+
+  return (
+    <section className="mt-8">
+      <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
+        Learn About Attic Cleaning
+      </h2>
+      <p className="mt-2 font-serif text-sm text-muted-foreground">
+        Explore our guides to help you make informed decisions about attic
+        cleaning services.
+      </p>
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {articles.slice(0, 3).map((article) => (
+          <ArticleCard
+            key={article.slug}
+            title={article.title}
+            excerpt={article.excerpt}
+            topicTag={article.topicTag}
+            slug={article.slug}
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export default function HomePage() {
   return (
     <div className="py-12">
       {/* Hero Section */}
@@ -56,48 +107,14 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Cities */}
-      {cities.length > 0 && (
-        <section className="mt-8">
-          <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
-            Featured Cities
-          </h2>
-          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {cities.map((city) => (
-              <CityCard
-                key={city.slug}
-                name={city.name}
-                state={city.state}
-                slug={city.slug}
-                companyCount={city._count.listings}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <Suspense>
+        <FeaturedCities />
+      </Suspense>
 
       {/* Educational Content */}
-      {articles.length > 0 && (
-        <section className="mt-8">
-          <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
-            Learn About Attic Cleaning
-          </h2>
-          <p className="mt-2 font-serif text-sm text-muted-foreground">
-            Explore our guides to help you make informed decisions about attic
-            cleaning services.
-          </p>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {articles.slice(0, 3).map((article) => (
-              <ArticleCard
-                key={article.slug}
-                title={article.title}
-                excerpt={article.excerpt}
-                topicTag={article.topicTag}
-                slug={article.slug}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <Suspense>
+        <EducationalContent />
+      </Suspense>
     </div>
   )
 }

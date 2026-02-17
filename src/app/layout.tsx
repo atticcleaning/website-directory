@@ -15,7 +15,7 @@ const sourceSerif4 = Source_Serif_4({
   variable: "--font-serif",
   subsets: ["latin"],
   weight: ["400"],
-  style: ["normal", "italic"],
+  style: ["normal"],
   display: "swap",
 });
 
@@ -23,9 +23,8 @@ const lora = Lora({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["500"],
-  style: ["normal", "italic"],
+  style: ["normal"],
   display: "swap",
-  preload: false,
 });
 
 export const metadata: Metadata = {

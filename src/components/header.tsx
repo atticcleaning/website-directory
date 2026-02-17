@@ -1,18 +1,7 @@
-"use client"
-
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import SearchBar from "@/components/search-bar"
 
-interface HeaderProps {
-  showSearch?: boolean
-}
-
-export default function Header({ showSearch = true }: HeaderProps) {
-  const pathname = usePathname()
-  const isHomepage = pathname === "/"
-  const shouldShowSearch = showSearch && !isHomepage
-
+export default function Header() {
   return (
     <header role="banner" className="border-b border-border">
       <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-4 py-3 md:px-6">
@@ -23,11 +12,9 @@ export default function Header({ showSearch = true }: HeaderProps) {
           AtticCleaning.com
         </Link>
 
-        {shouldShowSearch && (
-          <div className="ml-4 flex-1 max-w-sm">
-            <SearchBar variant="header" />
-          </div>
-        )}
+        <div className="ml-4 flex-1 max-w-sm">
+          <SearchBar variant="header" />
+        </div>
       </div>
     </header>
   )
