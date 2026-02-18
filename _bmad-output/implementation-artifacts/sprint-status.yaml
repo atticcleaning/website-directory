@@ -101,12 +101,12 @@ development_status:
   epic-8-retrospective: optional
 
   # Epic 9: Visual Design Enhancement
-  epic-9: in-progress
+  epic-9: done
   9-1-design-direction-component-audit: done
   9-2-homepage-redesign: done
   9-3-listing-card-search-results-enhancement: done
   9-4-city-landing-listing-detail-enhancement: done
-  9-5-global-polish-design-system-update: backlog
+  9-5-global-polish-design-system-update: done
   epic-9-retrospective: optional
 
   # Epic 10: Educational Content Creation

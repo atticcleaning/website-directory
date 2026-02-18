@@ -28,7 +28,7 @@ export default function ServiceTagChip({ serviceType, variant }: ServiceTagChipP
         backgroundColor: `var(${config.bgVar})`,
         color: `var(${config.textVar})`,
       }}
-      className="inline-flex items-center rounded-full px-2.5 py-0.5 font-sans text-xs md:text-[13px] font-medium"
+      className="inline-flex items-center rounded-full border border-current/10 px-2.5 py-0.5 font-sans text-xs md:text-[13px] font-medium"
     >
       {config.label}
     </span>

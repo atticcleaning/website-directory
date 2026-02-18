@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function Footer() {
   return (
-    <footer role="contentinfo" className="border-t border-border">
+    <footer role="contentinfo" className="border-t border-border bg-secondary">
       <div className="mx-auto w-full max-w-[1200px] px-4 py-8 md:px-6 md:py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3">
           {/* Featured Cities */}
@@ -14,7 +14,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/phoenix-az"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors duration-200"
                 >
                   Phoenix, AZ
                 </Link>
@@ -22,7 +22,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/los-angeles-ca"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors duration-200"
                 >
                   Los Angeles, CA
                 </Link>
@@ -30,7 +30,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/houston-tx"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors duration-200"
                 >
                   Houston, TX
                 </Link>
@@ -47,7 +47,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/articles"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors duration-200"
                 >
                   Articles
                 </Link>
@@ -55,7 +55,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/about"
-                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline"
+                  className="font-sans text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors duration-200"
                 >
                   About
                 </Link>
