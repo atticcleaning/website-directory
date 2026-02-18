@@ -40,7 +40,7 @@ async function FeaturedCities() {
   if (cities.length === 0) return null
 
   return (
-    <section className="mt-8">
+    <section className="mt-10 md:mt-12">
       <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
         Featured Cities
       </h2>
@@ -70,7 +70,7 @@ function EducationalContent() {
   if (articles.length === 0) return null
 
   return (
-    <section className="mt-8">
+    <section className="mt-10 md:mt-12">
       <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
         Learn About Attic Cleaning
       </h2>
@@ -97,7 +97,7 @@ export default function HomePage() {
   return (
     <div className="py-12">
       {/* Hero Section */}
-      <section className="flex flex-col items-center text-center">
+      <section className="flex flex-col items-center text-center bg-secondary rounded-xl px-6 py-10 md:py-14">
         <h1 className="font-display text-[1.75rem] font-medium leading-[1.2] text-foreground md:text-[2.5rem]">
           Find trusted attic cleaning professionals near you
         </h1>

@@ -12,7 +12,7 @@ export default function CityCard({ name, state, slug, companyCount }: CityCardPr
     <Link
       href={`/${slug}`}
       aria-label={`View ${companyCount} attic cleaning companies in ${name}, ${state}`}
-      className="flex min-h-[44px] flex-col rounded-lg border border-border bg-card p-4 font-sans transition-colors hover:border-primary"
+      className="flex min-h-[44px] flex-col rounded-lg border border-border bg-card p-4 font-sans shadow-sm transition-all duration-200 hover:shadow-md motion-safe:hover:-translate-y-0.5 hover:border-primary"
     >
       <span className="text-base font-semibold text-foreground">
         {name}, {state}

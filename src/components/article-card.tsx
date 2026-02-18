@@ -11,7 +11,7 @@ export default function ArticleCard({ title, excerpt, topicTag, slug }: ArticleC
   return (
     <Link
       href={`/articles/${slug}`}
-      className="block min-h-[44px] rounded-lg border border-border bg-card p-4 transition-colors hover:border-primary"
+      className="block min-h-[44px] rounded-lg border border-border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-md motion-safe:hover:-translate-y-0.5 hover:border-primary"
     >
       <span className="font-sans text-xs font-medium uppercase text-muted-foreground">
         {topicTag}
