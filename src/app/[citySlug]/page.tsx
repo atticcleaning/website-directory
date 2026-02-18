@@ -139,7 +139,7 @@ export default async function CityLandingPage({
 
       {/* Aggregated Stats */}
       {companyCount > 0 && (
-        <div className="mt-2 flex items-center gap-2">
+        <div className="mt-2 inline-flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
           <span className="font-sans text-sm text-muted-foreground">
             {companyCount} {companyCount === 1 ? "company" : "companies"}
           </span>
@@ -164,20 +164,19 @@ export default async function CityLandingPage({
           <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
             Nearby Cities
           </h2>
-          <ul className="mt-3 space-y-2">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {nearbyCities.map((nearby) => (
-              <li key={nearby.slug}>
-                <Link
-                  href={`/${nearby.slug}`}
-                  className="inline-flex min-h-[44px] items-center font-sans text-sm font-medium text-foreground hover:underline"
-                >
-                  {nearby.name}, {nearby.state} &mdash;{" "}
-                  {nearby.listingCount}{" "}
-                  {nearby.listingCount === 1 ? "company" : "companies"}
-                </Link>
-              </li>
+              <Link
+                key={nearby.slug}
+                href={`/${nearby.slug}`}
+                className="flex min-h-[44px] items-center rounded-lg border border-border bg-card px-4 py-3 font-sans text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary"
+              >
+                {nearby.name}, {nearby.state} &mdash;{" "}
+                {nearby.listingCount}{" "}
+                {nearby.listingCount === 1 ? "company" : "companies"}
+              </Link>
             ))}
-          </ul>
+          </div>
         </section>
       )}
     </div>

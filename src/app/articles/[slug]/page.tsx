@@ -72,7 +72,7 @@ export default async function ArticlePage({
   return (
     <div className="mx-auto max-w-[680px] py-6 md:py-8">
       {/* Topic Tag */}
-      <span className="font-sans text-xs font-medium uppercase text-muted-foreground">
+      <span className="inline-flex items-center bg-secondary rounded-full px-2.5 py-0.5 font-sans text-xs font-medium uppercase text-muted-foreground">
         {frontmatter.topicTag}
       </span>
 
@@ -94,7 +94,7 @@ export default async function ArticlePage({
 
       {/* Related Articles */}
       {relatedArticles.length > 0 && (
-        <section className="mt-8">
+        <section className="mt-10 md:mt-12">
           <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
             Related Articles
           </h2>

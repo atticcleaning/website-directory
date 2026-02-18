@@ -17,7 +17,7 @@ export default async function CityStats({ city }: { city: string }) {
   ).toFixed(1)
 
   return (
-    <span>
+    <span className="font-sans text-sm font-medium">
       There are {cityData._count.listings} attic cleaning{" "}
       {cityData._count.listings === 1 ? "company" : "companies"} in{" "}
       {cityData.name} with an average rating of {avgRating} stars.

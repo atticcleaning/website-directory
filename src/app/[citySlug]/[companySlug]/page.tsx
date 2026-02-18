@@ -157,7 +157,7 @@ export default async function ListingDetailPage({
               <a
                 href={`tel:${listing.phone.replace(/[^\d+]/g, "")}`}
                 aria-label={`Call ${listing.name}`}
-                className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary"
+                className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary hover:underline transition-colors duration-200"
               >
                 <Phone className="h-4 w-4" aria-hidden="true" />
                 {listing.phone}
@@ -169,7 +169,7 @@ export default async function ListingDetailPage({
                 target="_blank"
                 rel="noopener"
                 aria-label={`Visit ${listing.name} website`}
-                className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary"
+                className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary hover:underline transition-colors duration-200"
               >
                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
                 Visit Website
@@ -206,20 +206,22 @@ export default async function ListingDetailPage({
           <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
             Business Hours
           </h2>
-          {typeof workingHours === "string" ? (
-            <p className="mt-3 font-sans text-sm text-foreground whitespace-pre-line">
-              {workingHours}
-            </p>
-          ) : (
-            <dl className="mt-3 space-y-1">
-              {workingHours.map(({ day, time }) => (
-                <div key={day} className="flex gap-2 font-sans text-sm">
-                  <dt className="w-28 font-medium text-foreground">{day}</dt>
-                  <dd className="text-muted-foreground">{time}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          <div className="mt-3 rounded-lg bg-secondary p-4">
+            {typeof workingHours === "string" ? (
+              <p className="font-sans text-sm text-foreground whitespace-pre-line">
+                {workingHours}
+              </p>
+            ) : (
+              <dl className="space-y-1">
+                {workingHours.map(({ day, time }) => (
+                  <div key={day} className="flex gap-2 font-sans text-sm">
+                    <dt className="w-28 font-medium text-foreground">{day}</dt>
+                    <dd className="text-muted-foreground">{time}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
         </div>
       )}
 
@@ -233,7 +235,7 @@ export default async function ListingDetailPage({
             {listing.reviews.map((review) => (
               <div
                 key={review.id}
-                className="rounded-lg border border-border bg-card p-3 md:p-4"
+                className="rounded-lg border border-border bg-card p-3 md:p-4 shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-sans text-sm font-medium text-foreground">
@@ -268,7 +270,7 @@ export default async function ListingDetailPage({
       <div className="mt-8 border-t border-border pt-6">
         <Link
           href={`/${listing.city.slug}`}
-          className="inline-flex min-h-[44px] items-center font-sans text-sm font-medium text-foreground hover:underline"
+          className="inline-flex min-h-[44px] items-center font-sans text-sm font-medium text-foreground hover:underline hover:text-primary transition-colors duration-200"
         >
           More attic cleaning companies in {listing.city.name},{" "}
           {listing.city.state}
