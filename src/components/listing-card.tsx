@@ -16,10 +16,10 @@ export default function ListingCard({ listing }: ListingCardProps) {
     : null
 
   return (
-    <article className="rounded-lg border border-border bg-card p-3 md:p-4">
+    <article className="rounded-lg border border-border bg-card p-3 md:p-4 shadow-sm transition-all duration-200 hover:shadow-md motion-safe:hover:-translate-y-0.5">
       <Link
         href={`/${listing.citySlug}/${listing.companySlug}`}
-        className="inline-flex min-h-[44px] items-center font-sans text-lg font-semibold text-foreground"
+        className="inline-flex min-h-[44px] items-center font-sans text-lg font-semibold text-foreground hover:text-primary transition-colors duration-200"
       >
         {listing.name}
       </Link>
@@ -58,7 +58,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             <a
               href={`tel:${listing.phone.replace(/[^\d+]/g, "")}`}
               aria-label={`Call ${listing.name}`}
-              className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary"
+              className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary hover:underline transition-colors duration-200"
             >
               <Phone className="h-4 w-4" aria-hidden="true" />
               {listing.phone}
@@ -70,7 +70,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               target="_blank"
               rel="noopener"
               aria-label={`Visit ${listing.name} website`}
-              className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary"
+              className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-medium text-primary hover:underline transition-colors duration-200"
             >
               <ExternalLink className="h-4 w-4" aria-hidden="true" />
               Visit Website

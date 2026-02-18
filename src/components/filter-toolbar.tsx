@@ -78,10 +78,10 @@ export default function FilterToolbar({ results }: FilterToolbarProps) {
             aria-pressed={activeFilters.size === 0}
             onClick={clearFilters}
             className={cn(
-              "shrink-0 rounded-full px-3 min-h-[44px] font-sans text-sm font-medium transition-colors",
+              "shrink-0 rounded-full px-3 min-h-[44px] font-sans text-sm font-medium transition-colors duration-200",
               activeFilters.size === 0
-                ? "bg-primary text-primary-foreground border border-primary"
-                : "bg-transparent text-foreground border border-border"
+                ? "bg-primary text-primary-foreground border border-primary shadow-sm"
+                : "bg-transparent text-foreground border border-border hover:bg-muted"
             )}
           >
             All Services
@@ -95,10 +95,10 @@ export default function FilterToolbar({ results }: FilterToolbarProps) {
                 aria-pressed={isActive}
                 onClick={() => toggleFilter(type)}
                 className={cn(
-                  "shrink-0 whitespace-nowrap rounded-full px-3 min-h-[44px] font-sans text-sm font-medium transition-colors",
+                  "shrink-0 whitespace-nowrap rounded-full px-3 min-h-[44px] font-sans text-sm font-medium transition-colors duration-200",
                   isActive
-                    ? "bg-primary text-primary-foreground border border-primary"
-                    : "bg-transparent text-foreground border border-border"
+                    ? "bg-primary text-primary-foreground border border-primary shadow-sm"
+                    : "bg-transparent text-foreground border border-border hover:bg-muted"
                 )}
               >
                 {SERVICE_TAG_CONFIG[type].label}

@@ -10,6 +10,7 @@ export default function StarRating({ rating, reviewCount, variant }: StarRatingP
   const fullStars = Math.floor(rating)
   const hasPartialStar = rating % 1 >= 0.25
   const emptyStars = 5 - fullStars - (hasPartialStar ? 1 : 0)
+  const starSize = variant === "full" ? "h-5 w-5" : "h-4 w-4"
 
   return (
     <div
@@ -20,7 +21,7 @@ export default function StarRating({ rating, reviewCount, variant }: StarRatingP
         <svg
           key={`full-${i}`}
           aria-hidden="true"
-          className="h-4 w-4 text-accent"
+          className={`${starSize} text-accent`}
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -31,7 +32,7 @@ export default function StarRating({ rating, reviewCount, variant }: StarRatingP
         <svg
           key="partial"
           aria-hidden="true"
-          className="h-4 w-4 text-accent opacity-50"
+          className={`${starSize} text-accent opacity-60`}
           viewBox="0 0 24 24"
           fill="currentColor"
         >
@@ -42,7 +43,7 @@ export default function StarRating({ rating, reviewCount, variant }: StarRatingP
         <svg
           key={`empty-${i}`}
           aria-hidden="true"
-          className="h-4 w-4 text-muted-foreground/20"
+          className={`${starSize} text-muted-foreground/25`}
           viewBox="0 0 24 24"
           fill="currentColor"
         >

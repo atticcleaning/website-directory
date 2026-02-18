@@ -53,7 +53,7 @@ export default function SearchBar({ variant, defaultValue = "" }: SearchBarProps
           type="submit"
           disabled={!query.trim()}
           className={cn(
-            "shrink-0 rounded-r-md bg-primary font-sans font-semibold text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed",
+            "shrink-0 rounded-r-md bg-primary font-sans font-semibold text-primary-foreground transition-all duration-200 hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed",
             isHero
               ? "h-11 px-5 text-base"
               : "h-11 px-3 text-sm"
