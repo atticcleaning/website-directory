@@ -110,9 +110,9 @@ development_status:
   epic-9-retrospective: optional
 
   # Epic 10: Educational Content Creation
-  epic-10: in-progress
+  epic-10: done
   10-1-content-strategy-topic-planning: done
   10-2-article-batch-1-core-service-guides: done
   10-3-article-batch-2-homeowner-education: done
-  10-4-article-batch-3-regional-seasonal-content: backlog
+  10-4-article-batch-3-regional-seasonal-content: done
   epic-10-retrospective: optional
