@@ -45,7 +45,7 @@ export default function SearchBar({ variant, defaultValue = "" }: SearchBarProps
           className={cn(
             "w-full rounded-l-md border border-r-0 border-border bg-background font-sans text-foreground placeholder:text-muted-foreground",
             isHero
-              ? "h-11 pl-11 pr-4 text-base"
+              ? "h-11 pl-11 pr-4 text-base shadow-[inset_0_2px_4px_0_oklch(0.85_0.005_100_/_0.15)]"
               : "h-11 pl-9 pr-3 text-sm"
           )}
         />
@@ -53,10 +53,10 @@ export default function SearchBar({ variant, defaultValue = "" }: SearchBarProps
           type="submit"
           disabled={!query.trim()}
           className={cn(
-            "shrink-0 rounded-r-md bg-primary font-sans font-semibold text-primary-foreground transition-all duration-200 hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed",
+            "shrink-0 rounded-r-md font-sans font-semibold text-primary-foreground transition-all duration-200 hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed",
             isHero
-              ? "h-11 px-5 text-base"
-              : "h-11 px-3 text-sm"
+              ? "h-12 px-6 text-base bg-gradient-to-b from-primary to-[oklch(0.50_0.215_264)]"
+              : "h-11 px-3 text-sm bg-primary"
           )}
         >
           Search

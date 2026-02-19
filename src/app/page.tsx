@@ -97,7 +97,7 @@ export default function HomePage() {
   return (
     <div className="py-12">
       {/* Hero Section */}
-      <section className="flex flex-col items-center text-center bg-secondary rounded-xl px-6 py-10 md:py-14">
+      <section className="flex flex-col items-center text-center rounded-xl bg-gradient-to-br from-secondary via-secondary to-[oklch(0.955_0.008_90)] px-6 py-10 md:py-14">
         <h1 className="font-display text-[1.75rem] font-medium leading-[1.2] text-foreground md:text-[2.5rem]">
           Find trusted attic cleaning professionals near you
         </h1>
