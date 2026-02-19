@@ -16,10 +16,10 @@ export default function ListingCard({ listing }: ListingCardProps) {
     : null
 
   return (
-    <article className="rounded-lg border border-border bg-card p-3 md:p-4 shadow-card transition-all duration-200 hover:shadow-card-hover motion-safe:hover:-translate-y-1">
+    <article className="rounded-lg border border-border bg-card p-4 md:p-5 shadow-card transition-all duration-200 hover:shadow-card-hover motion-safe:hover:-translate-y-1">
       <Link
         href={`/${listing.citySlug}/${listing.companySlug}`}
-        className="inline-flex min-h-[44px] items-center font-sans text-lg font-semibold text-foreground hover:text-primary transition-colors duration-200"
+        className="inline-flex min-h-[44px] items-center font-sans text-lg font-semibold leading-snug text-foreground hover:text-primary transition-colors duration-200"
       >
         {listing.name}
       </Link>
@@ -41,7 +41,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
       )}
 
       {listing.reviewSnippet && (
-        <p className="mt-2 font-serif text-sm italic text-muted-foreground line-clamp-2">
+        <p className="mt-2 font-serif text-sm italic text-muted-foreground/90 line-clamp-2">
           {listing.reviewSnippet}
         </p>
       )}

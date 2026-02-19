@@ -139,7 +139,7 @@ export default async function CityLandingPage({
 
       {/* Aggregated Stats */}
       {companyCount > 0 && (
-        <div className="mt-2 inline-flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
+        <div className="mt-2 inline-flex items-center gap-2 bg-secondary rounded-lg px-3 py-2 shadow-card">
           <span className="font-sans text-sm text-muted-foreground">
             {companyCount} {companyCount === 1 ? "company" : "companies"}
           </span>
