@@ -40,8 +40,8 @@ async function FeaturedCities() {
   if (cities.length === 0) return null
 
   return (
-    <section className="mt-10 md:mt-12">
-      <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
+    <section className="mt-10 md:mt-12 pt-8 md:pt-10 border-t border-border/50">
+      <h2 className="font-sans text-xl font-bold text-foreground md:text-2xl">
         Featured Cities
       </h2>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -71,7 +71,7 @@ function EducationalContent() {
 
   return (
     <section className="mt-10 md:mt-12">
-      <h2 className="font-sans text-xl font-semibold text-foreground md:text-2xl">
+      <h2 className="font-sans text-xl font-bold text-foreground md:text-2xl">
         Learn About Attic Cleaning
       </h2>
       <p className="mt-2 font-serif text-sm text-muted-foreground">
@@ -97,7 +97,9 @@ export default function HomePage() {
   return (
     <div className="py-12">
       {/* Hero Section */}
-      <section className="flex flex-col items-center text-center rounded-xl bg-gradient-to-br from-secondary via-secondary to-[oklch(0.955_0.008_90)] px-6 py-10 md:py-14">
+      <section className="relative overflow-hidden flex flex-col items-center text-center rounded-xl bg-gradient-to-br from-secondary via-secondary to-[oklch(0.955_0.008_90)] px-6 py-10 md:py-14">
+        <div className="pointer-events-none absolute -z-10 -right-20 -top-20 h-64 w-64 rounded-full bg-primary/[0.06] blur-3xl" aria-hidden="true" />
+        <div className="pointer-events-none absolute -z-10 -left-16 -bottom-16 h-48 w-48 rounded-full bg-accent/[0.07] blur-3xl" aria-hidden="true" />
         <h1 className="font-display text-[1.75rem] font-medium leading-[1.2] text-foreground md:text-[2.5rem]">
           Find trusted attic cleaning professionals near you
         </h1>
