@@ -241,6 +241,26 @@ The site meets production quality standards — WCAG 2.1 AA accessibility, perfo
 **FRs covered:** (NFR-focused)
 **Additional:** INFRA-6 through INFRA-9, NFR-P1 through NFR-P8, NFR-S1 through NFR-S7, NFR-A1 through NFR-A10, NFR-R1 through NFR-R5, NFR-I4
 
+### Epic 8: Data Population & Multi-Market Expansion
+Import real Outscraper listing data across 25 metros, validate data quality, and ensure build performance at scale.
+**FRs covered:** FR24, FR25, FR26, FR27, FR28, FR29, FR32
+**Additional:** NFR-SC1, NFR-SC4, NFR-P7
+
+### Epic 9: Visual Design Enhancement
+Elevate the site from functional prototype to polished visual identity — CSS-only changes applying "Authority Through Refined Details" aesthetic across all components and page templates.
+**FRs covered:** (Visual quality enhancement)
+**Additional:** NFR-A2, UX-1 through UX-18
+
+### Epic 10: Educational Content Creation
+Create 48 educational articles across 8 categories with real directory data enrichment and internal linking, following the content strategy and topic plan.
+**FRs covered:** FR20, FR21, FR22, FR31
+**Additional:** INFRA-4
+
+### Epic 11: Advanced Visual Polish — Malewicz Design Principles
+Apply professional UI design principles from Michal Malewicz to transform the site from "clean and functional" to "polished and trust-inspiring." All changes are CSS-only, building on Epic 9's foundation. Focuses on color-matched shadows, subtle gradients, button hierarchy, card depth, homepage decoration, and cross-page consistency. Uses `frontend-design` skill and browser automation for live visual verification.
+**FRs covered:** (Visual quality enhancement — Aesthetic Usability Effect)
+**Additional:** NFR-A1, NFR-A2, NFR-P2 (zero CLS)
+
 ---
 
 ## Epic 1: Project Foundation & Data Pipeline

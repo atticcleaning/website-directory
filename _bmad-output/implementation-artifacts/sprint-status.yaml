@@ -116,3 +116,12 @@ development_status:
   10-3-article-batch-2-homeowner-education: done
   10-4-article-batch-3-regional-seasonal-content: done
   epic-10-retrospective: optional
+
+  # Epic 11: Advanced Visual Polish — Malewicz Design Principles
+  epic-11: in-progress
+  11-1-shadow-system-color-matched-depth-foundation: done
+  11-2-gradient-button-hierarchy-enhancement: backlog
+  11-3-card-component-depth-typography-refinement: backlog
+  11-4-homepage-hero-section-decoration: backlog
+  11-5-cross-page-regression-polish-pass: backlog
+  epic-11-retrospective: optional

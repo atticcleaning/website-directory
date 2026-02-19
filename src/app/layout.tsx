@@ -8,7 +8,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
-  display: "swap",
+  display: "optional",
 });
 
 const sourceSerif4 = Source_Serif_4({
@@ -16,7 +16,7 @@ const sourceSerif4 = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400"],
   style: ["normal"],
-  display: "swap",
+  display: "optional",
 });
 
 const lora = Lora({
@@ -24,7 +24,7 @@ const lora = Lora({
   subsets: ["latin"],
   weight: ["500"],
   style: ["normal"],
-  display: "swap",
+  display: "optional",
 });
 
 export const metadata: Metadata = {

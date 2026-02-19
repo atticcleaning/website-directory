@@ -31,6 +31,11 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Malewicz Shadow Tokens — compose with hover:, motion-safe:, dark: variants */
+  --shadow-card: 0 2px 8px -2px color-mix(in oklch, var(--shadow-color-base), transparent 88%);
+  --shadow-card-hover: 0 12px 20px -6px color-mix(in oklch, var(--shadow-color-medium), transparent 80%);
+  --shadow-hero: 0 16px 32px -8px color-mix(in oklch, var(--shadow-color-strong), transparent 78%);
 }
 
 :root {
@@ -69,6 +74,11 @@
   --chip-general-text: oklch(0.373 0.031 259.7);
   --chip-restoration-bg: oklch(0.943 0.028 294.5);
   --chip-restoration-text: oklch(0.432 0.211 292.8);
+
+  /* Malewicz Shadow System — color-scheme-overridable base colors (hue 100) */
+  --shadow-color-base: oklch(0.75 0.01 100);
+  --shadow-color-medium: oklch(0.65 0.015 100);
+  --shadow-color-strong: oklch(0.55 0.02 100);
 }
 
 @layer base {

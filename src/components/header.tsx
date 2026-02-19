@@ -3,7 +3,7 @@ import SearchBar from "@/components/search-bar"
 
 export default function Header() {
   return (
-    <header role="banner" className="bg-card shadow-sm">
+    <header role="banner" className="bg-card shadow-card">
       <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-4 py-3 md:px-6">
         <Link
           href="/"

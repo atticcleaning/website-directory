@@ -235,7 +235,7 @@ export default async function ListingDetailPage({
             {listing.reviews.map((review) => (
               <div
                 key={review.id}
-                className="rounded-lg border border-border bg-card p-3 md:p-4 shadow-sm"
+                className="rounded-lg border border-border bg-card p-3 md:p-4 shadow-card"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-sans text-sm font-medium text-foreground">

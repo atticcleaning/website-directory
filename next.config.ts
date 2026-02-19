@@ -33,6 +33,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: {
     cpus: 3,
+    optimizePackageImports: ["lucide-react"],
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
