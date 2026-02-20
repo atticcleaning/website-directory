@@ -16,6 +16,7 @@ export default function Header() {
             width={32}
             height={32}
             className="h-8 w-8"
+            unoptimized
           />
           <span className="font-sans text-xl font-semibold text-foreground">
             AtticCleaning.com
