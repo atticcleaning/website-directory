@@ -98,7 +98,7 @@ export default function HomePage() {
   return (
     <div className="py-12">
       {/* Hero Section */}
-      <section className="relative overflow-hidden flex flex-col items-center justify-center text-center rounded-xl px-6 py-14 md:py-20">
+      <section className="relative overflow-hidden flex flex-col items-center justify-center text-center rounded-xl px-6 py-24 min-h-[420px] md:py-28 md:min-h-[400px]">
         <Image
           src="/images/hero-attic-transformation.webp"
           alt="Professional attic cleaning crew removing old insulation and installing fresh insulation"
