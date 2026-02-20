@@ -118,10 +118,10 @@ development_status:
   epic-10-retrospective: optional
 
   # Epic 11: Advanced Visual Polish — Malewicz Design Principles
-  epic-11: in-progress
+  epic-11: done
   11-1-shadow-system-color-matched-depth-foundation: done
   11-2-gradient-button-hierarchy-enhancement: done
   11-3-card-component-depth-typography-refinement: done
   11-4-homepage-hero-section-decoration: done
-  11-5-cross-page-regression-polish-pass: backlog
+  11-5-cross-page-regression-polish-pass: done
   epic-11-retrospective: optional

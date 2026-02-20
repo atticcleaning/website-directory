@@ -169,7 +169,7 @@ export default async function CityLandingPage({
               <Link
                 key={nearby.slug}
                 href={`/${nearby.slug}`}
-                className="flex min-h-[44px] items-center rounded-lg border border-border bg-card px-4 py-3 font-sans text-sm font-medium text-foreground shadow-card transition-all duration-200 hover:shadow-card-hover hover:border-primary"
+                className="flex min-h-[44px] items-center rounded-lg border border-border bg-card px-4 py-3 font-sans text-sm font-medium text-foreground shadow-card transition-all duration-200 hover:shadow-card-hover motion-safe:hover:-translate-y-1 hover:border-primary/60"
               >
                 {nearby.name}, {nearby.state} &mdash;{" "}
                 {nearby.listingCount}{" "}
