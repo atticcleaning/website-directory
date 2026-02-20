@@ -1,5 +1,5 @@
 import { cache } from "react"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import StarRating from "@/components/star-rating"
@@ -26,6 +26,14 @@ const getAllCities = cache(async function getAllCities() {
   })
 })
 
+/** Redirect old-format URLs (e.g. /albuquerque → /albuquerque-nm) */
+const findCityByPrefix = cache(async function findCityByPrefix(slug: string) {
+  return prisma.city.findFirst({
+    where: { slug: { startsWith: `${slug}-` } },
+    select: { slug: true },
+  })
+})
+
 export async function generateStaticParams() {
   const cities = await prisma.city.findMany({
     select: { slug: true },
@@ -42,6 +50,8 @@ export async function generateMetadata({
   const city = await getCity(citySlug)
 
   if (!city) {
+    const match = await findCityByPrefix(citySlug)
+    if (match) permanentRedirect(`/${match.slug}`)
     return { title: "City Not Found | AtticCleaning.com", robots: { index: false } }
   }
 
@@ -90,6 +100,8 @@ export default async function CityLandingPage({
   const city = await getCity(citySlug)
 
   if (!city) {
+    const match = await findCityByPrefix(citySlug)
+    if (match) permanentRedirect(`/${match.slug}`)
     notFound()
   }
 

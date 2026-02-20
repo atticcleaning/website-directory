@@ -1,5 +1,5 @@
 import { cache } from "react"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Phone, ExternalLink } from "lucide-react"
@@ -20,6 +20,14 @@ const getListing = cache(async function getListing(citySlug: string, companySlug
       reviews: { orderBy: { publishedAt: "desc" } },
       serviceTags: true,
     },
+  })
+})
+
+/** Redirect old nested URLs (e.g. /los-angeles/beverly-hills → /beverly-hills-ca) */
+const findCityByPrefix = cache(async function findCityByPrefix(slug: string) {
+  return prisma.city.findFirst({
+    where: { slug: { startsWith: `${slug}-` } },
+    select: { slug: true },
   })
 })
 
@@ -46,6 +54,9 @@ export async function generateMetadata({
   const listing = await getListing(citySlug, companySlug)
 
   if (!listing) {
+    // Old nested URL: /los-angeles/beverly-hills → /beverly-hills-ca
+    const match = await findCityByPrefix(companySlug)
+    if (match) permanentRedirect(`/${match.slug}`)
     return { title: "Listing Not Found | AtticCleaning.com", robots: { index: false } }
   }
 
@@ -94,6 +105,9 @@ export default async function ListingDetailPage({
   const listing = await getListing(citySlug, companySlug)
 
   if (!listing) {
+    // Old nested URL: /los-angeles/beverly-hills → /beverly-hills-ca
+    const match = await findCityByPrefix(companySlug)
+    if (match) permanentRedirect(`/${match.slug}`)
     notFound()
   }
 
