@@ -104,8 +104,10 @@ export default function HomePage() {
           alt="Professional attic cleaning technician in protective gear vacuuming old insulation and installing fresh fiberglass insulation in residential attic"
           fill
           priority
+          fetchPriority="high"
           className="object-cover"
-          sizes="100vw"
+          sizes="(max-width: 1248px) 100vw, 1200px"
+          quality={60}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" aria-hidden="true" />
         <h1 className="relative font-display text-[1.75rem] font-medium leading-[1.2] text-white md:text-[2.5rem] drop-shadow-lg">
