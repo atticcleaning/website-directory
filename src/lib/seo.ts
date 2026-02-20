@@ -27,11 +27,20 @@ export function buildMetadata({
       url,
       type: "website",
       siteName: SITE_NAME,
+      images: [
+        {
+          url: `${BASE_URL}/images/professional-attic-cleaning-insulation-removal-service.webp`,
+          width: 1376,
+          height: 768,
+          alt: "Professional attic cleaning technician removing old insulation and installing fresh fiberglass insulation",
+        },
+      ],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
+      images: [`${BASE_URL}/images/professional-attic-cleaning-insulation-removal-service.webp`],
     },
   }
 }

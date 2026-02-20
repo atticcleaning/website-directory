@@ -100,8 +100,8 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden flex flex-col items-center justify-center text-center rounded-xl px-6 py-24 min-h-[420px] md:py-28 md:min-h-[400px]">
         <Image
-          src="/images/hero-attic-transformation.webp"
-          alt="Professional attic cleaning crew removing old insulation and installing fresh insulation"
+          src="/images/professional-attic-cleaning-insulation-removal-service.webp"
+          alt="Professional attic cleaning technician in protective gear vacuuming old insulation and installing fresh fiberglass insulation in residential attic"
           fill
           priority
           className="object-cover"
