@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
+import Image from "next/image"
 import SearchBar from "@/components/search-bar"
 import CityCard from "@/components/city-card"
 import ArticleCard from "@/components/article-card"
@@ -97,13 +98,20 @@ export default function HomePage() {
   return (
     <div className="py-12">
       {/* Hero Section */}
-      <section className="relative overflow-hidden flex flex-col items-center text-center rounded-xl bg-gradient-to-br from-secondary via-secondary to-[oklch(0.955_0.008_90)] px-6 py-10 md:py-14">
-        <div className="pointer-events-none absolute -z-10 -right-20 -top-20 h-64 w-64 rounded-full bg-primary/[0.06] blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -z-10 -left-16 -bottom-16 h-48 w-48 rounded-full bg-accent/[0.07] blur-3xl" aria-hidden="true" />
-        <h1 className="font-display text-[1.75rem] font-medium leading-[1.2] text-foreground md:text-[2.5rem]">
+      <section className="relative overflow-hidden flex flex-col items-center justify-center text-center rounded-xl px-6 py-14 md:py-20">
+        <Image
+          src="/images/hero-attic-transformation.webp"
+          alt="Professional attic cleaning crew removing old insulation and installing fresh insulation"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" aria-hidden="true" />
+        <h1 className="relative font-display text-[1.75rem] font-medium leading-[1.2] text-white md:text-[2.5rem] drop-shadow-lg">
           Find trusted attic cleaning professionals near you
         </h1>
-        <div className="mt-6 w-full max-w-2xl">
+        <div className="relative mt-6 w-full max-w-2xl">
           <SearchBar variant="hero" />
         </div>
       </section>
