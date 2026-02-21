@@ -64,6 +64,11 @@ async function FeaturedCities() {
 
 async function FeaturedListings() {
   const listings = await prisma.listing.findMany({
+    where: {
+      photos: { some: {} },
+      serviceTags: { some: {} },
+      NOT: { name: { contains: "pest", mode: "insensitive" } },
+    },
     orderBy: [{ starRating: "desc" }, { reviewCount: "desc" }],
     take: 4,
     include: {
