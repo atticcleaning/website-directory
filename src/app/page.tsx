@@ -63,14 +63,16 @@ async function FeaturedCities() {
 }
 
 async function FeaturedListings() {
+  // Hand-picked listings with attic photos and insulation removal tags
+  const featuredIds = [
+    "cmloa5pnn000470do94qfx5hi", // TLS Energy Savers
+    "cmlpd4kcz0018wwdo1ob7st35", // Supreme Air Austin
+    "cmloam1vh0001qcdobujhmq4m", // Koala Insulation of Nashville
+    "cmlnyt5em0006jido6bq7bacb", // Green Faith Solutions
+  ]
+
   const listings = await prisma.listing.findMany({
-    where: {
-      photos: { some: {} },
-      serviceTags: { some: {} },
-      NOT: { name: { contains: "pest", mode: "insensitive" } },
-    },
-    orderBy: [{ starRating: "desc" }, { reviewCount: "desc" }],
-    take: 4,
+    where: { id: { in: featuredIds } },
     include: {
       serviceTags: true,
       photos: { where: { isPrimary: true }, take: 1 },
