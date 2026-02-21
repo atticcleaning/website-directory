@@ -3,10 +3,12 @@ import { Suspense } from "react"
 import Image from "next/image"
 import SearchBar from "@/components/search-bar"
 import CityCard from "@/components/city-card"
+import ListingCard from "@/components/listing-card"
 import ArticleCard from "@/components/article-card"
 import prisma from "@/lib/prisma"
 import { getAllArticles } from "@/lib/mdx"
 import { buildMetadata } from "@/lib/seo"
+import type { ListingResult } from "@/types"
 
 // Revalidate hourly — homepage data only changes on build/import
 export const revalidate = 3600
@@ -54,6 +56,49 @@ async function FeaturedCities() {
             slug={city.slug}
             companyCount={city._count.listings}
           />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+async function FeaturedListings() {
+  const listings = await prisma.listing.findMany({
+    orderBy: [{ starRating: "desc" }, { reviewCount: "desc" }],
+    take: 4,
+    include: {
+      serviceTags: true,
+      photos: { where: { isPrimary: true }, take: 1 },
+      city: { select: { slug: true } },
+    },
+  })
+
+  if (listings.length === 0) return null
+
+  const results: ListingResult[] = listings.map((listing) => ({
+    id: listing.id,
+    name: listing.name,
+    starRating: listing.starRating,
+    reviewCount: listing.reviewCount,
+    phone: listing.phone,
+    website: listing.website,
+    address: listing.address,
+    distanceMiles: null,
+    serviceTags: listing.serviceTags.map((t) => t.serviceType),
+    reviewSnippet: null,
+    citySlug: listing.city.slug,
+    companySlug: listing.slug,
+    primaryPhotoUrl: listing.photos[0]?.url ?? null,
+  }))
+
+  return (
+    <section className="mt-10 md:mt-12 pt-8 md:pt-10 border-t border-border/50">
+      <h2 className="font-sans text-xl font-bold text-foreground md:text-2xl">
+        Featured Attic Cleaning Services
+      </h2>
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        {results.map((listing) => (
+          <ListingCard key={listing.id} listing={listing} />
         ))}
       </div>
     </section>
@@ -117,6 +162,11 @@ export default function HomePage() {
           <SearchBar variant="hero" />
         </div>
       </section>
+
+      {/* Featured Listings */}
+      <Suspense>
+        <FeaturedListings />
+      </Suspense>
 
       {/* Featured Cities */}
       <Suspense>
