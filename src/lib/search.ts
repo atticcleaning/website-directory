@@ -81,6 +81,22 @@ async function resolveLocation(query: string): Promise<ResolvedLocation | null> 
         longitude: city.longitude,
       }
     }
+
+    // Fall back to ZipCode table for "City, ST" format
+    const zipByCityState = await prisma.zipCode.findFirst({
+      where: {
+        city: { equals: cityName.trim(), mode: "insensitive" },
+        state: { equals: stateCode.toUpperCase(), mode: "insensitive" },
+      },
+    })
+    if (zipByCityState) {
+      return {
+        city: zipByCityState.city,
+        state: zipByCityState.state,
+        latitude: zipByCityState.latitude,
+        longitude: zipByCityState.longitude,
+      }
+    }
   }
 
   // Try city name only (no state)
@@ -95,6 +111,21 @@ async function resolveLocation(query: string): Promise<ResolvedLocation | null> 
       state: city.state,
       latitude: city.latitude,
       longitude: city.longitude,
+    }
+  }
+
+  // Fall back to ZipCode table city name (covers cities without listings)
+  const zipByCity = await prisma.zipCode.findFirst({
+    where: {
+      city: { equals: trimmed, mode: "insensitive" },
+    },
+  })
+  if (zipByCity) {
+    return {
+      city: zipByCity.city,
+      state: zipByCity.state,
+      latitude: zipByCity.latitude,
+      longitude: zipByCity.longitude,
     }
   }
 
