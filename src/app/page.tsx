@@ -139,6 +139,7 @@ function EducationalContent() {
             excerpt={article.excerpt}
             topicTag={article.topicTag}
             slug={article.slug}
+            heroImage={article.heroImage}
           />
         ))}
       </div>

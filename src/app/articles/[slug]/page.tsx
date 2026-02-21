@@ -106,6 +106,7 @@ export default async function ArticlePage({
                 excerpt={related.excerpt}
                 topicTag={related.topicTag}
                 slug={related.slug}
+                heroImage={related.heroImage}
               />
             ))}
           </div>

@@ -12,6 +12,7 @@ export interface ArticleFrontmatter {
   topicTag: string
   publishedAt: string
   relatedCities: string[]
+  heroImage?: string
 }
 
 const ARTICLES_DIR = path.join(process.cwd(), "src/content/articles")
