@@ -4,7 +4,7 @@ const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  "img-src 'self' data: https://*.googleusercontent.com https://*.ggpht.com https://streetviewpixels-pa.googleapis.com",
   "font-src 'self'",
   "connect-src 'self'",
   "frame-src https://www.google.com",
@@ -31,6 +31,22 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "streetviewpixels-pa.googleapis.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.ggpht.com",
+      },
+    ],
+  },
   experimental: {
     cpus: 3,
     optimizePackageImports: ["lucide-react"],

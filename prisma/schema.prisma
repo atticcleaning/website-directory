@@ -54,6 +54,7 @@ model Listing {
   cityId        String
   reviews       Review[]
   serviceTags   ServiceTag[]
+  photos        ListingPhoto[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -78,6 +79,18 @@ model ServiceTag {
   serviceType ServiceType
 
   @@unique([listingId, serviceType])
+}
+
+model ListingPhoto {
+  id        String   @id @default(cuid())
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  url       String
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
 }
 
 model ZipCode {

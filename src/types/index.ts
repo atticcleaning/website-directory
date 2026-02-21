@@ -31,4 +31,5 @@ export interface ListingResult {
   reviewSnippet: string | null
   citySlug: string
   companySlug: string
+  primaryPhotoUrl: string | null
 }

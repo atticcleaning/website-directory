@@ -166,6 +166,44 @@ export function shouldExcludeBusiness(name: string, subtypes: string | null): bo
   return true
 }
 
+// ─── Photo URL Extraction ─────────────────────────────────
+
+function extractPhotoUrls(biz: Record<string, unknown>): string[] {
+  const urls: string[] = []
+
+  // Single cover photo (standard places scraper: "photo" field)
+  const singlePhoto = biz.photo || biz.photo_url
+  if (typeof singlePhoto === "string" && singlePhoto.startsWith("http")) {
+    urls.push(singlePhoto)
+  }
+
+  // Photos array (dedicated scraper or enhanced export)
+  const photosArray = biz.photos
+  if (Array.isArray(photosArray)) {
+    for (const item of photosArray) {
+      if (typeof item === "string" && item.startsWith("http")) {
+        urls.push(item)
+      } else if (item && typeof item === "object") {
+        const url = (item as Record<string, unknown>).big_photo_link
+          ?? (item as Record<string, unknown>).photo_link
+          ?? (item as Record<string, unknown>).url
+        if (typeof url === "string" && url.startsWith("http")) {
+          urls.push(url)
+        }
+      }
+    }
+  }
+
+  // Street view as last resort fallback
+  const streetView = biz.street_view
+  if (urls.length === 0 && typeof streetView === "string" && streetView.startsWith("http")) {
+    urls.push(streetView)
+  }
+
+  // Deduplicate and cap at 10
+  return [...new Set(urls)].slice(0, 10)
+}
+
 // ─── CLI Argument Parsing ──────────────────────────────────
 
 interface CliArgs {
@@ -322,6 +360,8 @@ export interface ImportSummary {
   rejected: number
   citiesCreated: number
   reviewsImported: number
+  photosImported: number
+  listingsWithPhotos: number
 }
 
 export function emptyImportSummary(): ImportSummary {
@@ -332,6 +372,8 @@ export function emptyImportSummary(): ImportSummary {
     rejected: 0,
     citiesCreated: 0,
     reviewsImported: 0,
+    photosImported: 0,
+    listingsWithPhotos: 0,
   }
 }
 
@@ -342,6 +384,8 @@ export function mergeImportSummaries(target: ImportSummary, source: ImportSummar
   target.rejected += source.rejected
   target.citiesCreated += source.citiesCreated
   target.reviewsImported += source.reviewsImported
+  target.photosImported += source.photosImported
+  target.listingsWithPhotos += source.listingsWithPhotos
 }
 
 export function printImportSummary(summary: ImportSummary, label: string = "Import Summary", showReviews: boolean = false): void {
@@ -356,6 +400,7 @@ export function printImportSummary(summary: ImportSummary, label: string = "Impo
   if (showReviews) {
     console.log(`  Reviews imported:   ${summary.reviewsImported}`)
   }
+  console.log(`  Photos imported:    ${summary.photosImported} photos (${summary.listingsWithPhotos} listings with photos)`)
   console.log(`═══════════════════════════════════════`)
 }
 
@@ -637,6 +682,23 @@ export async function runImport(prisma: PrismaClient, options: ImportOptions, ca
       summary.listingsAdded++
       existingPlaceIds.add(placeId)
     }
+
+    // ── Import photos (idempotent: delete + recreate) ──
+
+    const photoUrls = extractPhotoUrls(biz)
+    if (photoUrls.length > 0) {
+      await prisma.listingPhoto.deleteMany({ where: { listingId: listing.id } })
+      await prisma.listingPhoto.createMany({
+        data: photoUrls.map((url, idx) => ({
+          listingId: listing.id,
+          url,
+          isPrimary: idx === 0,
+          sortOrder: idx,
+        })),
+      })
+      summary.listingsWithPhotos++
+      summary.photosImported += photoUrls.length
+    }
   }
 
   // ── Import reviews if requested ─────────────────────
@@ -724,7 +786,8 @@ export async function printDatabaseTotals(prisma: PrismaClient): Promise<void> {
   const totalListings = await prisma.listing.count()
   const totalCities = await prisma.city.count()
   const totalReviews = await prisma.review.count()
-  console.log(`\nDatabase totals: ${totalListings} listings, ${totalCities} cities, ${totalReviews} reviews`)
+  const totalPhotos = await prisma.listingPhoto.count()
+  console.log(`\nDatabase totals: ${totalListings} listings, ${totalCities} cities, ${totalReviews} reviews, ${totalPhotos} photos`)
 }
 
 /**

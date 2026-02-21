@@ -125,3 +125,11 @@ development_status:
   11-4-homepage-hero-section-decoration: done
   11-5-cross-page-regression-polish-pass: done
   epic-11-retrospective: optional
+
+  # Epic 12: Listing Photo Pipeline & Display
+  epic-12: done
+  12-1-photo-data-model-import-pipeline-extension: done
+  12-2-listing-detail-page-photo-gallery: done
+  12-3-listing-card-city-page-photo-thumbnails: done
+  12-4-photo-seo-performance-quality-validation: done
+  epic-12-retrospective: optional

@@ -897,7 +897,7 @@ So that I can use it regardless of ability, device, or connection speed.
 
 ---
 
-**All 7 Epics Complete — 22 Stories Total:**
+**All 7 Original Epics Complete — 22 Stories Total:**
 
 | Epic | Title | Stories | FRs |
 |---|---|---|---|
@@ -911,4 +911,107 @@ So that I can use it regardless of ability, device, or connection speed.
 
 **All 33 FRs covered. All NFR categories addressed.**
 
-**Select an Option:** [A] Advanced Elicitation [P] Party Mode [C] Continue
+---
+
+## Epic 8-11: Post-MVP Enhancements (Complete)
+
+Epics 8-11 added via sprint change proposals (see `sprint-change-proposal-2026-02-14.md` and `sprint-change-proposal-2026-02-18.md`). All complete.
+
+---
+
+## Epic 12: Listing Photo Pipeline & Display
+
+Extend the Outscraper import pipeline to capture Google Maps business photos and display them on listing pages, listing cards, and city landing pages. Uses Next.js Image component for automatic optimization and Cloudflare CDN for edge delivery. All existing text-only functionality preserved — photos are additive enhancements with graceful fallback.
+
+**Added via:** Sprint Change Proposal 2026-02-20
+
+### Story 12.1: Photo Data Model & Import Pipeline Extension
+
+As a **developer**,
+I want to extend the database schema and import pipeline to capture photo URLs from Outscraper exports,
+So that listing photos from Google Maps are stored and available for display across the site.
+
+**Acceptance Criteria:**
+
+**Given** the current Prisma schema without photo support
+**When** the schema migration is complete
+**Then** a `ListingPhoto` model exists with fields: id, url, width, height, isPrimary, sortOrder, listingId, createdAt
+**And** the `Listing` model has a `photos` relation to `ListingPhoto`
+**And** the import script maps Outscraper's `photos` field to `ListingPhoto` records
+**And** maximum 10 photos are imported per listing
+**And** the first photo is flagged as `isPrimary: true`
+**And** the import is idempotent — re-running clears and re-imports photos for each listing
+**And** the import summary report includes photo statistics
+**And** `next.config.ts` has `remotePatterns` configured for Google image domains
+**And** CSP `img-src` directive allows Google image domains
+**And** existing import data is re-run to populate photos for all listings
+
+### Story 12.2: Listing Detail Page Photo Gallery
+
+As a **homeowner**,
+I want to see business photos on a company's listing page,
+So that I can visually assess the company and their work before contacting them.
+
+**Acceptance Criteria:**
+
+**Given** a listing detail page with photos available
+**When** the page renders
+**Then** a responsive photo gallery displays below the company name/rating and above reviews
+**And** the primary photo uses `priority` loading (LCP candidate)
+**And** additional photos use `loading="lazy"`
+**And** all photos have descriptive alt text with company name
+**And** mobile layout: full-width primary + 2-column grid (max 6 photos)
+**And** desktop layout: primary (2/3 width) + thumbnail grid (1/3 width, max 8 photos)
+**And** photos use `rounded-lg` consistent with design system
+**And** gallery does not cause CLS (dimensions set via width/height or aspect ratio)
+
+**Given** a listing detail page without photos
+**When** the page renders
+**Then** the gallery section is not rendered — page layout identical to current text-only version
+
+### Story 12.3: Listing Card & City Page Photo Thumbnails
+
+As a **homeowner**,
+I want to see a photo thumbnail on listing cards,
+So that I get a quick visual impression of each company while scanning search results.
+
+**Acceptance Criteria:**
+
+**Given** a listing card with a primary photo available
+**When** rendered on search results or city landing pages
+**Then** an 80x80px (mobile) / 96x96px (desktop) thumbnail displays alongside the company name and rating
+**And** the thumbnail uses `rounded-lg` and `object-cover` for consistent framing
+**And** the card layout maintains its data-dense design — photo is a supporting element
+**And** `shadow-card` and `hover:shadow-card-hover` tokens are maintained
+
+**Given** a listing card without photos
+**When** rendered on search results or city landing pages
+**Then** the card renders identically to the current text-only layout (no placeholder, no broken image)
+
+**Given** city landing page and search results queries
+**When** fetching listing data
+**Then** queries include the primary photo (`photos: { where: { isPrimary: true }, take: 1 }`)
+
+### Story 12.4: Photo SEO, Performance & Quality Validation
+
+As the **site owner**,
+I want photos optimized for SEO and performance validated across all page types,
+So that photos enhance the site without degrading performance or accessibility.
+
+**Acceptance Criteria:**
+
+**Given** listing pages with photos
+**When** search engines crawl the page
+**Then** listing detail pages use the primary photo for `og:image` and `twitter:image`
+**And** pages without photos fall back to the shared hero image
+**And** all photos have SEO-optimized alt text with business name and location
+
+**Given** all page types with photo enhancements
+**When** tested for performance
+**Then** LCP < 1.5s on listing detail pages with gallery (mobile 4G)
+**And** page weight < 500KB initial load (lazy-loaded photos excluded)
+**And** zero CLS from photo loading on all page types
+**And** Next.js Image optimization produces WebP/AVIF formats
+**And** Lighthouse performance score maintained >= 90
+**And** Lighthouse accessibility score maintained >= 95
+**And** photos render correctly in Chrome, Firefox, Safari

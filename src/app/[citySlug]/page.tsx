@@ -13,7 +13,10 @@ const getCity = cache(async function getCity(citySlug: string) {
     where: { slug: citySlug },
     include: {
       listings: {
-        include: { serviceTags: true },
+        include: {
+          serviceTags: true,
+          photos: { where: { isPrimary: true }, take: 1 },
+        },
         orderBy: { starRating: "desc" },
       },
     },
@@ -121,6 +124,7 @@ export default async function CityLandingPage({
     reviewSnippet: null,
     citySlug: city.slug,
     companySlug: listing.slug,
+    primaryPhotoUrl: listing.photos[0]?.url ?? null,
   }))
 
   // Nearby cities by geographic proximity

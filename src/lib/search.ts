@@ -231,8 +231,8 @@ async function enrichResults(rows: RawListingRow[]): Promise<ListingResult[]> {
 
   const listingIds = rows.map((r) => r.id)
 
-  // Fetch service tags and first review for all results in parallel
-  const [serviceTags, reviews] = await Promise.all([
+  // Fetch service tags, first review, and primary photo for all results in parallel
+  const [serviceTags, reviews, photos] = await Promise.all([
     prisma.serviceTag.findMany({
       where: { listingId: { in: listingIds } },
       select: { listingId: true, serviceType: true },
@@ -241,6 +241,11 @@ async function enrichResults(rows: RawListingRow[]): Promise<ListingResult[]> {
       where: { listingId: { in: listingIds }, text: { not: null } },
       orderBy: { publishedAt: "desc" },
       select: { listingId: true, text: true },
+      distinct: ["listingId"],
+    }),
+    prisma.listingPhoto.findMany({
+      where: { listingId: { in: listingIds }, isPrimary: true },
+      select: { listingId: true, url: true },
       distinct: ["listingId"],
     }),
   ])
@@ -264,6 +269,11 @@ async function enrichResults(rows: RawListingRow[]): Promise<ListingResult[]> {
     }
   }
 
+  const photoByListing = new Map<string, string>()
+  for (const photo of photos) {
+    photoByListing.set(photo.listingId, photo.url)
+  }
+
   // Enrich each row into a full ListingResult
   return rows.map((row) => ({
     id: row.id,
@@ -278,6 +288,7 @@ async function enrichResults(rows: RawListingRow[]): Promise<ListingResult[]> {
     distanceMiles: row.distanceMiles !== null ? Math.round(row.distanceMiles * 10) / 10 : null,
     serviceTags: tagsByListing.get(row.id) || [],
     reviewSnippet: reviewByListing.get(row.id) || null,
+    primaryPhotoUrl: photoByListing.get(row.id) ?? null,
   }))
 }
 

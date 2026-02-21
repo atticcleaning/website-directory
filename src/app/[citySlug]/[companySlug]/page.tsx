@@ -6,6 +6,7 @@ import { Phone, ExternalLink } from "lucide-react"
 import StarRating from "@/components/star-rating"
 import ServiceTagChip from "@/components/service-tag-chip"
 import GoogleMap from "@/components/google-map"
+import PhotoGallery from "@/components/photo-gallery"
 import prisma from "@/lib/prisma"
 import { buildMetadata, buildLocalBusinessJsonLd } from "@/lib/seo"
 
@@ -19,6 +20,7 @@ const getListing = cache(async function getListing(citySlug: string, companySlug
       city: true,
       reviews: { orderBy: { publishedAt: "desc" } },
       serviceTags: true,
+      photos: { orderBy: { sortOrder: "asc" } },
     },
   })
 })
@@ -69,6 +71,7 @@ export async function generateMetadata({
     title: `${listing.name} - Attic Cleaning in ${listing.city.name}, ${listing.city.state}`,
     description: `${listing.name} in ${listing.city.name}, ${listing.city.state}. Rated ${listing.starRating} stars from ${listing.reviewCount} reviews. Services: ${services}.`,
     path: `/${citySlug}/${companySlug}`,
+    imageUrl: listing.photos[0]?.url,
   })
 }
 
@@ -125,6 +128,7 @@ export default async function ListingDetailPage({
     reviewCount: listing.reviewCount,
     latitude: listing.latitude,
     longitude: listing.longitude,
+    imageUrl: listing.photos[0]?.url,
   })
 
   return (
@@ -158,6 +162,19 @@ export default async function ListingDetailPage({
             />
           ))}
         </div>
+      )}
+
+      {/* Photo Gallery */}
+      {listing.photos.length > 0 && (
+        <PhotoGallery
+          photos={listing.photos.map((p) => ({
+            id: p.id,
+            url: p.url,
+          }))}
+          companyName={listing.name}
+          cityName={listing.city.name}
+          state={listing.city.state}
+        />
       )}
 
       {/* Contact Section */}
