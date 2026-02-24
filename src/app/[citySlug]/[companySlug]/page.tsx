@@ -8,7 +8,7 @@ import ServiceTagChip from "@/components/service-tag-chip"
 import GoogleMap from "@/components/google-map"
 import PhotoGallery from "@/components/photo-gallery"
 import prisma from "@/lib/prisma"
-import { buildMetadata, buildLocalBusinessJsonLd } from "@/lib/seo"
+import { buildMetadata, buildLocalBusinessJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo"
 
 const getListing = cache(async function getListing(citySlug: string, companySlug: string) {
   return prisma.listing.findFirst({
@@ -118,6 +118,9 @@ export default async function ListingDetailPage({
   const workingHours = parseWorkingHours(listing.workingHours)
   const mapsApiKey = process.env.GOOGLE_MAPS_API_KEY ?? ""
 
+  const parsedHoursArray =
+    Array.isArray(workingHours) ? workingHours : null
+
   const jsonLd = buildLocalBusinessJsonLd({
     name: listing.name,
     address: listing.address,
@@ -129,13 +132,23 @@ export default async function ListingDetailPage({
     latitude: listing.latitude,
     longitude: listing.longitude,
     imageUrl: listing.photos[0]?.url,
+    workingHours: parsedHoursArray,
   })
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: `${listing.city.name}, ${listing.city.state}`, path: `/${citySlug}` },
+    { name: listing.name, path: `/${citySlug}/${companySlug}` },
+  ])
 
   return (
     <div className="mx-auto max-w-[800px] py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       {/* Company Name */}
       <h1 className="font-sans text-2xl font-bold text-foreground md:text-[2rem]">

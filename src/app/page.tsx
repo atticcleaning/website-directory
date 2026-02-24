@@ -7,7 +7,7 @@ import ListingCard from "@/components/listing-card"
 import ArticleCard from "@/components/article-card"
 import prisma from "@/lib/prisma"
 import { getAllArticles } from "@/lib/mdx"
-import { buildMetadata } from "@/lib/seo"
+import { buildMetadata, buildWebSiteJsonLd } from "@/lib/seo"
 import type { ListingResult } from "@/types"
 
 // Revalidate hourly — homepage data only changes on build/import
@@ -150,6 +150,12 @@ function EducationalContent() {
 export default function HomePage() {
   return (
     <div className="py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildWebSiteJsonLd()),
+        }}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden flex flex-col items-center justify-center text-center rounded-xl px-6 py-24 min-h-[420px] md:py-28 md:min-h-[400px]">
         <Image

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import ArticleCard from "@/components/article-card"
 import { getAllArticles } from "@/lib/mdx"
-import { buildMetadata } from "@/lib/seo"
+import { buildMetadata, buildCollectionPageJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo"
 
 export function generateMetadata(): Metadata {
   return buildMetadata({
@@ -28,6 +28,14 @@ const TOPIC_ORDER = [
 export default function ArticlesPage() {
   const articles = getAllArticles()
 
+  const collectionJsonLd = buildCollectionPageJsonLd(
+    articles.map((a) => ({ title: a.title, slug: a.slug }))
+  )
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Articles", path: "/articles" },
+  ])
+
   // Group articles by topic tag
   const grouped = new Map<string, typeof articles>()
   for (const tag of TOPIC_ORDER) {
@@ -41,6 +49,14 @@ export default function ArticlesPage() {
 
   return (
     <div className="py-8 md:py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Page Header */}
       <header>
         <h1 className="font-sans text-2xl font-bold text-foreground md:text-[2rem]">

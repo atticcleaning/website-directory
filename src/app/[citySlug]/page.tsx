@@ -5,7 +5,7 @@ import Link from "next/link"
 import StarRating from "@/components/star-rating"
 import FilterToolbar from "@/components/filter-toolbar"
 import prisma from "@/lib/prisma"
-import { buildMetadata } from "@/lib/seo"
+import { buildMetadata, buildBreadcrumbJsonLd, buildCityItemListJsonLd } from "@/lib/seo"
 import type { ListingResult } from "@/types"
 
 const getCity = cache(async function getCity(citySlug: string) {
@@ -146,8 +146,30 @@ export default async function CityLandingPage({
     .sort((a, b) => a.distance - b.distance)
     .slice(0, 5)
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: `${city.name}, ${city.state}`, path: `/${citySlug}` },
+  ])
+
+  const itemListJsonLd = buildCityItemListJsonLd(
+    city.name,
+    city.state,
+    city.listings.map((l) => ({
+      name: l.name,
+      citySlug: city.slug,
+      companySlug: l.slug,
+    }))
+  )
+
   return (
     <div className="py-6 md:py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
       {/* City Heading */}
       <h1 className="font-sans text-2xl font-bold text-foreground md:text-[2rem]">
         Attic Cleaning Companies in {city.name}, {city.state}

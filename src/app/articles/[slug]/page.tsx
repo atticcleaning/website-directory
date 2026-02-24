@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getArticleSlugs, getArticleBySlug, getAllArticles } from "@/lib/mdx"
 import ArticleCard from "@/components/article-card"
-import { buildMetadata } from "@/lib/seo"
+import { buildMetadata, buildArticleJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo"
 
 const getCachedArticle = cache(async function getCachedArticle(slug: string) {
   return getArticleBySlug(slug)
@@ -58,6 +58,19 @@ export default async function ArticlePage({
 
   const { frontmatter, content } = article
 
+  const articleJsonLd = buildArticleJsonLd({
+    title: frontmatter.title,
+    excerpt: frontmatter.excerpt,
+    slug: frontmatter.slug,
+    publishedAt: frontmatter.publishedAt,
+    heroImage: frontmatter.heroImage,
+  })
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Articles", path: "/articles" },
+    { name: frontmatter.title, path: `/articles/${slug}` },
+  ])
+
   const allArticles = getAllArticles()
   const sameTopicArticles = allArticles.filter(
     (a) => a.topicTag === frontmatter.topicTag && a.slug !== frontmatter.slug
@@ -71,6 +84,14 @@ export default async function ArticlePage({
 
   return (
     <div className="mx-auto max-w-[680px] py-6 md:py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Topic Tag */}
       <span className="inline-flex items-center bg-secondary rounded-full px-2.5 py-0.5 font-sans text-xs font-medium uppercase text-muted-foreground">
         {frontmatter.topicTag}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Source_Serif_4, Lora } from "next/font/google";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { buildOrganizationJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -46,6 +47,12 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.variable} ${sourceSerif4.variable} ${lora.variable} flex min-h-screen flex-col antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildOrganizationJsonLd()),
+          }}
+        />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"

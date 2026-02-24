@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { searchListings } from "@/lib/search"
 import RadiusInfo from "@/components/radius-info"
 import FilterToolbar from "@/components/filter-toolbar"
-import { buildMetadata } from "@/lib/seo"
+import { buildMetadata, buildBreadcrumbJsonLd } from "@/lib/seo"
 
 const getSearchResults = cache((q: string) => searchListings({ q }))
 
@@ -43,8 +43,16 @@ export default async function SearchPage({
     ? `${meta.location.city}, ${meta.location.state}`
     : null
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Search Results", path: "/search" },
+  ])
+
   return (
     <div className="py-6 md:py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <h1 className="font-sans text-2xl font-bold text-foreground md:text-[2rem]">
         {meta.totalCount} attic cleaning {meta.totalCount === 1 ? "company" : "companies"}{" "}
         {locationStr ? `in ${locationStr}` : `for "${meta.query}"`}
