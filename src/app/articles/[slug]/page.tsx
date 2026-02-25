@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getArticleSlugs, getArticleBySlug, getAllArticles } from "@/lib/mdx"
 import ArticleCard from "@/components/article-card"
-import { buildMetadata, buildArticleJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo"
+import { buildMetadata, buildArticleJsonLd, buildBreadcrumbJsonLd, BASE_URL } from "@/lib/seo"
 
 const getCachedArticle = cache(async function getCachedArticle(slug: string) {
   return getArticleBySlug(slug)
@@ -31,6 +31,9 @@ export async function generateMetadata({
     title: `${article.frontmatter.title} | AtticCleaning.com`,
     description: article.frontmatter.excerpt,
     path: `/articles/${slug}`,
+    imageUrl: article.frontmatter.heroImage
+      ? `${BASE_URL}${article.frontmatter.heroImage}`
+      : undefined,
   })
 }
 

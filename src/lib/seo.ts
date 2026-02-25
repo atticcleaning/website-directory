@@ -281,3 +281,56 @@ export function buildCityItemListJsonLd(
     })),
   }
 }
+
+/* ------------------------------------------------------------------ */
+/*  Listicle ItemList schema — listicle articles                      */
+/* ------------------------------------------------------------------ */
+
+interface ListicleItem {
+  name: string
+  citySlug: string
+  companySlug: string
+  position: number
+}
+
+export function buildListicleJsonLd(
+  title: string,
+  slug: string,
+  items: ListicleItem[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: title,
+    url: `${BASE_URL}/articles/${slug}`,
+    numberOfItems: items.length,
+    itemListElement: items.map((item) => ({
+      "@type": "ListItem",
+      position: item.position,
+      item: {
+        "@type": "LocalBusiness",
+        name: item.name,
+        url: `${BASE_URL}/${item.citySlug}/${item.companySlug}`,
+      },
+    })),
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  FAQPage schema — articles with FAQ sections                       */
+/* ------------------------------------------------------------------ */
+
+export function buildFAQJsonLd(faqs: { question: string; answer: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  }
+}
