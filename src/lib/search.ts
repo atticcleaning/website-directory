@@ -147,10 +147,11 @@ async function extractLocationFromQuery(
   const lastWord = words[words.length - 1]
 
   // Case 1: Last word is a 2-letter state code (e.g., "attic cleaning Los Angeles CA")
+  // Try longest candidates first so "New York" matches before "York"
   if (/^[A-Za-z]{2}$/.test(lastWord)) {
     const stateCode = lastWord.toUpperCase()
     const startIdx = Math.max(0, words.length - 5)
-    for (let i = words.length - 2; i >= startIdx; i--) {
+    for (let i = startIdx; i <= words.length - 2; i++) {
       const cityCandidate = words.slice(i, words.length - 1).join(" ")
 
       const city = await prisma.city.findFirst({
@@ -186,8 +187,9 @@ async function extractLocationFromQuery(
   }
 
   // Case 2: No state code — try trailing words as city names (max 3 words)
-  const startIdx = Math.max(0, words.length - 3)
-  for (let i = words.length - 1; i >= startIdx; i--) {
+  // Try longest candidates first so "San Francisco" matches before "Francisco"
+  const startIdx2 = Math.max(0, words.length - 3)
+  for (let i = startIdx2; i <= words.length - 1; i++) {
     const cityCandidate = words.slice(i).join(" ")
 
     const city = await prisma.city.findFirst({
@@ -216,6 +218,17 @@ async function extractLocationFromQuery(
   }
 
   return null
+}
+
+/**
+ * Strip "near me" and similar self-referential phrases from a query.
+ * Without geolocation these phrases are meaningless and block location resolution.
+ */
+function stripNearMe(query: string): string {
+  return query
+    .replace(/\b(near|close\s+to|around)\s+me\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 /**
@@ -416,14 +429,15 @@ async function enrichResults(rows: RawListingRow[]): Promise<ListingResult[]> {
 export async function searchListings(params: SearchParams): Promise<SearchResponse> {
   const { q, sort = "rating" } = params
   const trimmedQuery = q.trim().slice(0, MAX_QUERY_LENGTH)
+  const cleanedQuery = stripNearMe(trimmedQuery)
   const validatedService = validateService(params.service)
 
   // Empty query → return empty results
-  if (!trimmedQuery) {
+  if (!cleanedQuery) {
     return {
       results: [],
       meta: {
-        query: "",
+        query: trimmedQuery,
         totalCount: 0,
         expanded: true,
         radiusMiles: EXPANDED_RADIUS_2,
@@ -433,9 +447,9 @@ export async function searchListings(params: SearchParams): Promise<SearchRespon
   }
 
   // Resolve location from query (exact match, then fuzzy extraction)
-  let location = await resolveLocation(trimmedQuery)
-  if (!location && trimmedQuery.includes(" ")) {
-    location = await extractLocationFromQuery(trimmedQuery)
+  let location = await resolveLocation(cleanedQuery)
+  if (!location && cleanedQuery.includes(" ")) {
+    location = await extractLocationFromQuery(cleanedQuery)
   }
 
   let rows: RawListingRow[]
@@ -459,7 +473,7 @@ export async function searchListings(params: SearchParams): Promise<SearchRespon
     }
   } else {
     // No location — text-based search on listing name/address
-    rows = await searchByText(trimmedQuery, validatedService, sort)
+    rows = await searchByText(cleanedQuery, validatedService, sort)
     finalRadius = 0
   }
 
