@@ -133,6 +133,92 @@ async function resolveLocation(query: string): Promise<ResolvedLocation | null> 
 }
 
 /**
+ * Extract location from a mixed query like "attic cleaning Los Angeles CA".
+ * Called as a fallback when resolveLocation() fails on multi-word queries.
+ * Tries suffixes of the query as city names, with or without a trailing state code.
+ */
+async function extractLocationFromQuery(
+  query: string
+): Promise<ResolvedLocation | null> {
+  const normalized = query.replace(/,/g, " ").replace(/\s+/g, " ").trim()
+  const words = normalized.split(" ")
+  if (words.length < 2) return null
+
+  const lastWord = words[words.length - 1]
+
+  // Case 1: Last word is a 2-letter state code (e.g., "attic cleaning Los Angeles CA")
+  if (/^[A-Za-z]{2}$/.test(lastWord)) {
+    const stateCode = lastWord.toUpperCase()
+    const startIdx = Math.max(0, words.length - 5)
+    for (let i = words.length - 2; i >= startIdx; i--) {
+      const cityCandidate = words.slice(i, words.length - 1).join(" ")
+
+      const city = await prisma.city.findFirst({
+        where: {
+          name: { equals: cityCandidate, mode: "insensitive" },
+          state: { equals: stateCode, mode: "insensitive" },
+        },
+      })
+      if (city) {
+        return {
+          city: city.name,
+          state: city.state,
+          latitude: city.latitude,
+          longitude: city.longitude,
+        }
+      }
+
+      const zip = await prisma.zipCode.findFirst({
+        where: {
+          city: { equals: cityCandidate, mode: "insensitive" },
+          state: { equals: stateCode, mode: "insensitive" },
+        },
+      })
+      if (zip) {
+        return {
+          city: zip.city,
+          state: zip.state,
+          latitude: zip.latitude,
+          longitude: zip.longitude,
+        }
+      }
+    }
+  }
+
+  // Case 2: No state code — try trailing words as city names (max 3 words)
+  const startIdx = Math.max(0, words.length - 3)
+  for (let i = words.length - 1; i >= startIdx; i--) {
+    const cityCandidate = words.slice(i).join(" ")
+
+    const city = await prisma.city.findFirst({
+      where: { name: { equals: cityCandidate, mode: "insensitive" } },
+    })
+    if (city) {
+      return {
+        city: city.name,
+        state: city.state,
+        latitude: city.latitude,
+        longitude: city.longitude,
+      }
+    }
+
+    const zip = await prisma.zipCode.findFirst({
+      where: { city: { equals: cityCandidate, mode: "insensitive" } },
+    })
+    if (zip) {
+      return {
+        city: zip.city,
+        state: zip.state,
+        latitude: zip.latitude,
+        longitude: zip.longitude,
+      }
+    }
+  }
+
+  return null
+}
+
+/**
  * Validate service parameter against ServiceType enum.
  * Returns the valid service type string or undefined if invalid.
  */
@@ -346,8 +432,11 @@ export async function searchListings(params: SearchParams): Promise<SearchRespon
     }
   }
 
-  // Resolve location from query
-  const location = await resolveLocation(trimmedQuery)
+  // Resolve location from query (exact match, then fuzzy extraction)
+  let location = await resolveLocation(trimmedQuery)
+  if (!location && trimmedQuery.includes(" ")) {
+    location = await extractLocationFromQuery(trimmedQuery)
+  }
 
   let rows: RawListingRow[]
   let expanded = false
