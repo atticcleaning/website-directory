@@ -11,7 +11,7 @@ export default function Header() {
           className="flex shrink-0 items-center gap-2"
         >
           <Image
-            src="/images/attic-cleaning-logo-mark.png"
+            src="/images/attic-cleaning-logo-mark.webp"
             alt="AtticCleaning.com logo"
             width={32}
             height={32}
