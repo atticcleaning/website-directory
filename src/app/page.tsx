@@ -5,6 +5,7 @@ import SearchBar from "@/components/search-bar"
 import CityCard from "@/components/city-card"
 import ListingCard from "@/components/listing-card"
 import ArticleCard from "@/components/article-card"
+import NearbyListings from "@/components/nearby-listings"
 import prisma from "@/lib/prisma"
 import { getAllArticles } from "@/lib/mdx"
 import { buildMetadata, buildWebSiteJsonLd } from "@/lib/seo"
@@ -176,6 +177,9 @@ export default function HomePage() {
           <SearchBar variant="hero" />
         </div>
       </section>
+
+      {/* Nearby Listings (client-side, only renders when geolocation is cached) */}
+      <NearbyListings />
 
       {/* Featured Listings */}
       <Suspense>

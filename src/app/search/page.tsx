@@ -5,7 +5,16 @@ import RadiusInfo from "@/components/radius-info"
 import FilterToolbar from "@/components/filter-toolbar"
 import { buildMetadata, buildBreadcrumbJsonLd } from "@/lib/seo"
 
-const getSearchResults = cache((q: string) => searchListings({ q }))
+const getSearchResults = cache((q: string, lat?: number, lng?: number) =>
+  searchListings({ q, lat, lng })
+)
+
+function parseGeoParam(value: string | string[] | undefined): number | undefined {
+  const str = typeof value === "string" ? value : Array.isArray(value) ? value[0] : undefined
+  if (!str) return undefined
+  const n = parseFloat(str)
+  return isNaN(n) ? undefined : n
+}
 
 export async function generateMetadata({
   searchParams,
@@ -14,15 +23,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const params = await searchParams
   const q = typeof params.q === "string" ? params.q : Array.isArray(params.q) ? params.q[0] ?? "" : ""
-  const data = await getSearchResults(q)
-  const locationStr = data.meta.location
+  const lat = parseGeoParam(params.lat)
+  const lng = parseGeoParam(params.lng)
+  const isGeoSearch = lat !== undefined && lng !== undefined
+  const data = await getSearchResults(q, lat, lng)
+  const locationStr = isGeoSearch
+    ? "Near You"
+    : data.meta.location
     ? `${data.meta.location.city}, ${data.meta.location.state}`
     : q
   return buildMetadata({
-    title: locationStr
+    title: isGeoSearch
+      ? `Attic Cleaning Companies Near You | AtticCleaning.com`
+      : locationStr
       ? `Attic Cleaning Companies in ${locationStr} | AtticCleaning.com`
       : "Search Results | AtticCleaning.com",
-    description: locationStr
+    description: isGeoSearch
+      ? `Find top-rated attic cleaning companies near your location. Compare ratings, reviews, and services.`
+      : locationStr
       ? `Find top-rated attic cleaning companies in ${locationStr}. Compare ratings, reviews, and services.`
       : "Search results for attic cleaning companies. Compare ratings, reviews, and services.",
     path: "/search",
@@ -36,10 +54,15 @@ export default async function SearchPage({
 }) {
   const params = await searchParams
   const q = typeof params.q === "string" ? params.q : Array.isArray(params.q) ? params.q[0] ?? "" : ""
-  const data = await getSearchResults(q)
+  const lat = parseGeoParam(params.lat)
+  const lng = parseGeoParam(params.lng)
+  const isGeoSearch = lat !== undefined && lng !== undefined
+  const data = await getSearchResults(q, lat, lng)
 
   const { results, meta } = data
-  const locationStr = meta.location
+  const locationStr = isGeoSearch
+    ? null
+    : meta.location
     ? `${meta.location.city}, ${meta.location.state}`
     : null
 
@@ -55,7 +78,7 @@ export default async function SearchPage({
       />
       <h1 className="font-sans text-2xl font-bold text-foreground md:text-[2rem]">
         {meta.totalCount} attic cleaning {meta.totalCount === 1 ? "company" : "companies"}{" "}
-        {locationStr ? `in ${locationStr}` : `for "${meta.query}"`}
+        {isGeoSearch ? "near you" : locationStr ? `in ${locationStr}` : `for "${meta.query}"`}
       </h1>
 
       {meta.expanded && (

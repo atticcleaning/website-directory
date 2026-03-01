@@ -16,6 +16,8 @@ interface SearchParams {
   q: string
   service?: string
   sort?: string
+  lat?: number
+  lng?: number
 }
 
 interface ResolvedLocation {
@@ -429,8 +431,46 @@ async function enrichResults(rows: RawListingRow[]): Promise<ListingResult[]> {
 export async function searchListings(params: SearchParams): Promise<SearchResponse> {
   const { q, sort = "rating" } = params
   const trimmedQuery = q.trim().slice(0, MAX_QUERY_LENGTH)
-  const cleanedQuery = stripNearMe(trimmedQuery)
   const validatedService = validateService(params.service)
+
+  // If coordinates provided directly (from browser geolocation), skip text-based location resolution
+  if (params.lat !== undefined && params.lng !== undefined) {
+    let rows = await searchByRadius(params.lat, params.lng, DEFAULT_RADIUS, validatedService, sort)
+    let expanded = false
+    let finalRadius = DEFAULT_RADIUS
+
+    if (rows.length < MIN_RESULTS) {
+      rows = await searchByRadius(params.lat, params.lng, EXPANDED_RADIUS_1, validatedService, sort)
+      finalRadius = EXPANDED_RADIUS_1
+      expanded = true
+    }
+
+    if (rows.length < MIN_RESULTS) {
+      rows = await searchByRadius(params.lat, params.lng, EXPANDED_RADIUS_2, validatedService, sort)
+      finalRadius = EXPANDED_RADIUS_2
+      expanded = true
+    }
+
+    const enrichedResults = await enrichResults(rows)
+
+    return {
+      results: enrichedResults,
+      meta: {
+        query: trimmedQuery,
+        totalCount: enrichedResults.length,
+        expanded,
+        radiusMiles: finalRadius,
+        location: {
+          city: "Near You",
+          state: "",
+          latitude: params.lat,
+          longitude: params.lng,
+        },
+      },
+    }
+  }
+
+  const cleanedQuery = stripNearMe(trimmedQuery)
 
   // Empty query → return empty results
   if (!cleanedQuery) {
